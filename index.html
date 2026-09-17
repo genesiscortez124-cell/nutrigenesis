@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NutriGenesis Pro - Reporte Seguro</title>
+    <title>NutriGenesis Pro - Reporte Móvil</title>
     <style>
         :root {
             --bg-dark: #0f172a;
@@ -422,7 +422,8 @@
                     </select>
                 </div>
                 
-                <button class="btn-action" style="margin-bottom: 12px; background: var(--accent); color: white;" onclick="abrirReporteNutri()">📄 Ver Reporte para Nutricionista</button>
+                <button class="btn-action" style="margin-bottom: 8px; background: var(--accent); color: white;" onclick="abrirReporteNutri()">📄 Ver Reporte Interno</button>
+                <button class="btn-action" style="margin-bottom: 12px; background: #25d366; color: white;" onclick="enviarReporteCompartir()">📤 Enviar por WhatsApp / Correo</button>
 
                 <div id="contenedor-historial">
                     <p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; padding: 20px;">Aún no hay registros guardados.</p>
@@ -886,6 +887,39 @@
 
     function cerrarReporteNutri() {
         document.getElementById('modal-reporte').style.display = 'none';
+    }
+
+    function enviarReporteCompartir() {
+        const fechasFiltradas = filtrarFechas();
+        if(fechasFiltradas.length === 0) {
+            alert("No hay registros en el periodo seleccionado para enviar.");
+            return;
+        }
+
+        let filtroTxt = document.getElementById('filtro-periodo').selectedOptions[0].text;
+        let textoReporte = `📋 *REPORTE NUTRICIONAL* 📋\nPaciente: Genesis Cortez\nPeriodo: ${filtroTxt}\n\n`;
+
+        fechasFiltradas.forEach(fecha => {
+            let datos = historialDias[fecha];
+            let fechaBonita = obtenerFechaLegible(fecha);
+            textoReporte += `📅 *${fechaBonita}* (🔥 ${datos.calorias || 0} kcal)\n`;
+            textoReporte += `🍽️ ${datos.menu || 'Sin menú'}\n`;
+            textoReporte += `💪 ${datos.entrenamiento || 'Sin entrenamiento'}\n`;
+            textoReporte += `💧 Agua: ${datos.agua || 0} ml\n\n`;
+        });
+
+        // Usar la API nativa de compartir del celular (compatible con WhatsApp, Gmail, etc.)
+        if (navigator.share) {
+            navigator.share({
+                title: 'Reporte Nutricional - NutriGenesis',
+                text: textoReporte,
+            }).catch((error) => console.log('Error al compartir', error));
+        } else {
+            // Si el navegador no soporta share nativo, copiar al portapapeles
+            navigator.clipboard.writeText(textoReporte).then(() => {
+                alert("📋 ¡Reporte copiado al portapapeles! Ya puedes pegarlo en WhatsApp o correo.");
+            });
+        }
     }
 
     window.onload = function() {
