@@ -287,6 +287,8 @@
             justify-content: space-between;
         }
         .pantry-item span:first-child { font-weight: bold; color: white; }
+        .pantry-minuta-info { font-size: 0.65rem; color: var(--accent-warm); margin-top: 2px; }
+        .pantry-minuta-info.muted { color: var(--text-muted); font-style: italic; }
         .stock-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
         .pantry-item span.stock { color: var(--primary); font-size: 0.75rem; font-weight: bold; }
         .pantry-item.bajo { border-color: var(--danger); background: rgba(229, 72, 77, 0.1); }
@@ -303,6 +305,8 @@
             font-weight: bold;
         }
         .btn-edit:hover { background: var(--accent-warm); color: #2b1400; }
+        .btn-edit-danger { background: rgba(229, 72, 77, 0.25); }
+        .btn-edit-danger:hover { background: var(--danger); color: white; }
 
         /* Filtros Reporte */
         .filter-box {
@@ -659,6 +663,45 @@
 
                 <p style="font-size: 0.75rem; color: var(--primary); font-weight: bold; margin: 10px 0 6px;">🥗 Frescos & Frutas</p>
                 <div class="pantry-grid" id="grid-frescos"></div>
+
+                <p style="font-size: 0.75rem; color: var(--primary); font-weight: bold; margin: 10px 0 6px;">🧺 Otros productos</p>
+                <div class="pantry-grid" id="grid-otros"></div>
+            </div>
+
+            <div class="card">
+                <h3><span>➕ Agregar producto</span></h3>
+                <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 8px;">Agrega algo que no esté en la lista, eligiendo su categoría, cantidad y unidad de medida:</p>
+                <div class="form-group">
+                    <label>Nombre del producto</label>
+                    <input type="text" id="nuevo-stock-nombre" class="form-control" placeholder="Ej: Salsa de soya">
+                </div>
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <select id="nuevo-stock-categoria" class="form-control">
+                        <option value="proteinas">🥩 Proteínas &amp; Lácteos</option>
+                        <option value="cereales">🌾 Cereales &amp; Despensa</option>
+                        <option value="frescos">🥗 Frescos &amp; Frutas</option>
+                        <option value="otros" selected>🧺 Otros productos</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cantidad actual</label>
+                    <input type="number" id="nuevo-stock-cantidad" class="form-control" placeholder="Ej: 500" min="0" step="any">
+                </div>
+                <div class="form-group">
+                    <label>Unidad de medida</label>
+                    <input type="text" id="nuevo-stock-unidad" class="form-control" placeholder="Ej: g, ml, unid, paq, frasco">
+                </div>
+                <div class="form-group">
+                    <label>Ración típica que usarías en una comida (opcional)</label>
+                    <input type="number" id="nuevo-stock-racion" class="form-control" placeholder="Ej: 150 (en la misma unidad de arriba)" min="0" step="any">
+                </div>
+                <div class="form-group">
+                    <label>Calorías aprox. de esa ración (opcional)</label>
+                    <input type="number" id="nuevo-stock-calorias" class="form-control" placeholder="Ej: 250" min="0" step="any">
+                </div>
+                <p style="font-size: 0.68rem; color: var(--text-muted); margin: -4px 0 8px;">Si completas ración y calorías, este producto podrá salir sorteado automáticamente en la Minuta del Día 🎲</p>
+                <button class="btn-action" onclick="agregarProductoPersonalizado()">Agregar a la despensa</button>
             </div>
         </div>
 
@@ -772,30 +815,64 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal de edición de ración/calorías (para la Minuta automática) -->
+    <div id="modal-racion" class="modal-overlay">
+        <div class="modal-box">
+            <label class="modal-label" id="modal-racion-label">Datos para la minuta automática:</label>
+            <div class="form-group">
+                <label>Ración típica (misma unidad del producto)</label>
+                <input type="number" id="modal-racion-input" class="form-control" min="0" step="any" inputmode="decimal">
+            </div>
+            <div class="form-group">
+                <label>Calorías aprox. de esa ración</label>
+                <input type="number" id="modal-calorias-input" class="form-control" min="0" step="any" inputmode="decimal">
+            </div>
+            <p style="font-size:0.68rem; color:var(--text-muted); margin:-4px 0 4px;">Deja ambos campos en blanco o en 0 para que este producto no participe en el sorteo automático de comidas.</p>
+            <p class="input-error-msg" id="modal-racion-error"></p>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="modal-racion-cancel" style="background:#374151;">Cancelar</button>
+                <button class="btn-action" id="modal-racion-ok">Guardar</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
+    // Definición de categorías disponibles para el stock (id -> etiqueta con ícono)
+    const categoriasDespensa = [
+        { id: 'proteinas', label: '🥩 Proteínas & Lácteos' },
+        { id: 'cereales', label: '🌾 Cereales & Despensa' },
+        { id: 'frescos', label: '🥗 Frescos & Frutas' },
+        { id: 'otros', label: '🧺 Otros productos' }
+    ];
+
     let despensa = JSON.parse(localStorage.getItem('nutri_despensa')) || {
-        pollo: { nombre: "Pechuga Pollo", stock: 1500, max: 1500, unidad: "g" },
-        paleta: { nombre: "Posta Paleta", stock: 1000, max: 1000, unidad: "g" },
-        atun: { nombre: "Atún Agua", stock: 6, max: 6, unidad: "latas" },
-        huevos: { nombre: "Huevos", stock: 12, max: 12, unidad: "unid" },
-        leche: { nombre: "Leche Zero%", stock: 4, max: 4, unidad: "litros" },
-        yogurt: { nombre: "Yogurt Protein", stock: 8, max: 8, unidad: "unid" },
-        quesillo: { nombre: "Quesillo", stock: 2, max: 2, unidad: "unid" },
-        pan: { nombre: "Pan Protein", stock: 12, max: 12, unidad: "rej" },
-        avena: { nombre: "Avena", stock: 800, max: 800, unidad: "g" },
-        arrozFideos: { nombre: "Arroz/Fideos", stock: 1000, max: 1000, unidad: "g" },
-        galletas: { nombre: "Galletas Arroz", stock: 3, max: 3, unidad: "paq" },
-        mani: { nombre: "Mantequilla Maní", stock: 1, max: 1, unidad: "frasco" },
-        almendras: { nombre: "Almendras", stock: 200, max: 200, unidad: "g" },
-        palta: { nombre: "Palta Hass", stock: 5, max: 5, unidad: "unid" },
-        lechuga: { nombre: "Lechuga Escarola", stock: 2, max: 2, unidad: "unid" },
-        tomate: { nombre: "Tomate Cocktail", stock: 500, max: 500, unidad: "g" },
-        zanahoria: { nombre: "Zanahoria", stock: 4, max: 4, unidad: "unid" },
-        papas: { nombre: "Papas", stock: 1500, max: 1500, unidad: "g" },
-        frutas: { nombre: "Manzanas/Peras", stock: 6, max: 6, unidad: "unid" }
+        pollo: { nombre: "Pechuga Pollo", stock: 1500, max: 1500, unidad: "g", categoria: "proteinas", racion: 150, calorias: 248 },
+        paleta: { nombre: "Posta Paleta", stock: 1000, max: 1000, unidad: "g", categoria: "proteinas", racion: 150, calorias: 300 },
+        atun: { nombre: "Atún Agua", stock: 6, max: 6, unidad: "latas", categoria: "proteinas", racion: 1, calorias: 120 },
+        huevos: { nombre: "Huevos", stock: 12, max: 12, unidad: "unid", categoria: "proteinas", racion: 1, calorias: 70 },
+        leche: { nombre: "Leche Zero%", stock: 4, max: 4, unidad: "litros", categoria: "proteinas", racion: 0.2, calorias: 70 },
+        yogurt: { nombre: "Yogurt Protein", stock: 8, max: 8, unidad: "unid", categoria: "proteinas", racion: 1, calorias: 100 },
+        quesillo: { nombre: "Quesillo", stock: 2, max: 2, unidad: "unid", categoria: "proteinas", racion: 0.5, calorias: 90 },
+        pan: { nombre: "Pan Protein", stock: 12, max: 12, unidad: "rej", categoria: "cereales", racion: 2, calorias: 140 },
+        avena: { nombre: "Avena", stock: 800, max: 800, unidad: "g", categoria: "cereales", racion: 50, calorias: 190 },
+        arrozFideos: { nombre: "Arroz/Fideos", stock: 1000, max: 1000, unidad: "g", categoria: "cereales", racion: 100, calorias: 130 },
+        galletas: { nombre: "Galletas Arroz", stock: 3, max: 3, unidad: "paq", categoria: "cereales", racion: 0.3, calorias: 115 },
+        mani: { nombre: "Mantequilla Maní", stock: 1, max: 1, unidad: "frasco", categoria: "cereales", racion: 0.1, calorias: 95 },
+        almendras: { nombre: "Almendras", stock: 200, max: 200, unidad: "g", categoria: "cereales", racion: 30, calorias: 175 },
+        palta: { nombre: "Palta Hass", stock: 5, max: 5, unidad: "unid", categoria: "frescos", racion: 0.5, calorias: 120 },
+        lechuga: { nombre: "Lechuga Escarola", stock: 2, max: 2, unidad: "unid", categoria: "frescos", racion: 0.2, calorias: 10 },
+        tomate: { nombre: "Tomate Cocktail", stock: 500, max: 500, unidad: "g", categoria: "frescos", racion: 100, calorias: 20 },
+        zanahoria: { nombre: "Zanahoria", stock: 4, max: 4, unidad: "unid", categoria: "frescos", racion: 1, calorias: 25 },
+        papas: { nombre: "Papas", stock: 1500, max: 1500, unidad: "g", categoria: "frescos", racion: 150, calorias: 130 },
+        frutas: { nombre: "Manzanas/Peras", stock: 6, max: 6, unidad: "unid", categoria: "frescos", racion: 1, calorias: 80 }
     };
+
+    // A los ítems guardados antes de esta actualización les puede faltar "categoria"
+    for (let k in despensa) {
+        if (!despensa[k].categoria) despensa[k].categoria = 'otros';
+    }
 
     let historialDias = JSON.parse(localStorage.getItem('nutri_historial')) || {}; 
     let minutaActual = {};
@@ -884,6 +961,65 @@
             input.addEventListener('keydown', onKeyDown);
             modal.classList.add('open');
             setTimeout(() => input.focus(), 50);
+        });
+    }
+
+    // Ajusta el stock de un ítem de forma segura (por si el usuario ya lo eliminó de la despensa)
+    function ajustarStock(key, delta, decimales = 2) {
+        if (!despensa[key] || !delta) return;
+        let nuevo = despensa[key].stock + delta;
+        nuevo = Number(nuevo.toFixed(decimales));
+        despensa[key].stock = Math.max(0, nuevo);
+    }
+
+    function mostrarPromptRacion(item) {
+        return new Promise(resolve => {
+            const modal = document.getElementById('modal-racion');
+            const inputRacion = document.getElementById('modal-racion-input');
+            const inputCalorias = document.getElementById('modal-calorias-input');
+            const errorMsg = document.getElementById('modal-racion-error');
+            const btnOk = document.getElementById('modal-racion-ok');
+            const btnCancel = document.getElementById('modal-racion-cancel');
+
+            document.getElementById('modal-racion-label').innerText = `Datos para la minuta automática — ${item.nombre} (${item.unidad}):`;
+            inputRacion.value = item.racion || '';
+            inputCalorias.value = item.calorias || '';
+            inputRacion.classList.remove('input-error');
+            inputCalorias.classList.remove('input-error');
+            errorMsg.innerText = '';
+
+            function validarYCerrar() {
+                const racionTxt = inputRacion.value.trim();
+                const caloriasTxt = inputCalorias.value.trim();
+
+                // Ambos vacíos (o en 0): el producto queda fuera del sorteo automático
+                if ((racionTxt === '' || Number(racionTxt) === 0) && (caloriasTxt === '' || Number(caloriasTxt) === 0)) {
+                    cerrar({ racion: null, calorias: null });
+                    return;
+                }
+
+                const racion = Number(racionTxt);
+                const calorias = Number(caloriasTxt);
+                if (racionTxt === '' || isNaN(racion) || racion <= 0 || caloriasTxt === '' || isNaN(calorias) || calorias < 0) {
+                    inputRacion.classList.add('input-error');
+                    inputCalorias.classList.add('input-error');
+                    errorMsg.innerText = 'Completa ambos campos con números válidos, o déjalos vacíos.';
+                    return;
+                }
+                cerrar({ racion, calorias });
+            }
+
+            function cerrar(resultado) {
+                modal.classList.remove('open');
+                btnOk.removeEventListener('click', validarYCerrar);
+                btnCancel.removeEventListener('click', onCancel);
+                resolve(resultado);
+            }
+            function onCancel() { cerrar(null); }
+
+            btnOk.addEventListener('click', validarYCerrar);
+            btnCancel.addEventListener('click', onCancel);
+            modal.classList.add('open');
         });
     }
 
@@ -1054,70 +1190,68 @@
         }
     }
 
-    const opcionesMinuta = {
-        desayunos: [
-            { text: "1 Vaso Leche zero% + 2 rebanadas Pan Protein con palta", cal: 280, itemPan: 2, itemLeche: 0.2, itemPalta: 0.5 },
-            { text: "1 Yogurt Protein + Tazón Avena con berries y 1 huevo", cal: 340, itemYogurt: 1, itemAvena: 50, itemHuevos: 1 }
-        ],
-        colaciones1: [
-            { text: "1 Fruta fresca (Manzana o Pera)", cal: 80, itemFrutas: 1 },
-            { text: "1 Yogurt Protein", cal: 100, itemYogurt: 1 }
-        ],
-        almuerzos: [
-            { text: "Pechuga de pollo (150g) + 1 papa mediana + Ensalada", cal: 420, itemPollo: 150, itemPapas: 150, itemLechuga: 0.2, itemTomate: 100 },
-            { text: "Posta de paleta (150g) + 1 taza Arroz + Zanahoria", cal: 480, itemPaleta: 150, itemArroz: 100, itemZanahoria: 1 },
-            { text: "Atún en agua (1 lata) + 1 taza Fideos + Palta y lechuga", cal: 450, itemAtun: 1, itemArroz: 100, itemPalta: 1, itemLechuga: 0.2 }
-        ],
-        colaciones2: [
-            { text: "3 Galletas de arroz con mantequilla de maní", cal: 160, itemGalletas: 0.3, itemMani: 0.1 },
-            { text: "Puñado (30g) de almendras", cal: 180, itemAlmendras: 30 }
-        ],
-        cenas: [
-            { text: "2 rebanadas Pan Protein con 60g Quesillo y tomate", cal: 250, itemPan: 2, itemQuesillo: 0.5, itemTomate: 80 },
-            { text: "2 rebanadas Pan Protein con palta y huevo duro", cal: 310, itemPan: 2, itemPalta: 1, itemHuevos: 1 }
-        ]
+    // Plantillas de comidas: de qué categorías se puede tomar cada ingrediente
+    const plantillasMinuta = {
+        desayuno:  { icono: '🌅', label: 'Desayuno',   bloques: [ { categorias: ['proteinas'] }, { categorias: ['cereales'] } ] },
+        colacion1: { icono: '🍎', label: 'Colación 1', bloques: [ { categorias: ['frescos', 'proteinas'] } ] },
+        almuerzo:  { icono: '🍽️', label: 'Almuerzo',   bloques: [ { categorias: ['proteinas'] }, { categorias: ['cereales'] }, { categorias: ['frescos'] } ] },
+        colacion2: { icono: '☕', label: 'Colación 2', bloques: [ { categorias: ['cereales', 'frescos'] } ] },
+        cena:      { icono: '🌙', label: 'Cena',       bloques: [ { categorias: ['proteinas'] }, { categorias: ['cereales'] } ] }
     };
 
+    // Ítems de una o más categorías que tienen ración/calorías configuradas y stock suficiente
+    function obtenerIngredientesDisponibles(categorias, excluirKeys) {
+        return Object.keys(despensa).filter(k => {
+            const it = despensa[k];
+            return categorias.includes(it.categoria)
+                && it.racion > 0
+                && it.calorias !== undefined && it.calorias !== null
+                && it.stock >= it.racion
+                && !excluirKeys.includes(k);
+        });
+    }
+
+    function armarComida(bloques) {
+        const items = [];
+        bloques.forEach(bloque => {
+            const usados = items.map(i => i.key);
+            const disponibles = obtenerIngredientesDisponibles(bloque.categorias, usados);
+            if (disponibles.length === 0) return;
+            const key = disponibles[Math.floor(Math.random() * disponibles.length)];
+            const it = despensa[key];
+            items.push({ key, nombre: it.nombre, racion: it.racion, unidad: it.unidad, calorias: it.calorias });
+        });
+        const cal = items.reduce((acc, i) => acc + i.calorias, 0);
+        const text = items.length
+            ? items.map(i => `${i.racion} ${i.unidad} ${i.nombre}`).join(' + ')
+            : '⚠️ Sin ingredientes suficientes (agrega ración/calorías a tus productos o recarga stock)';
+        return { items, cal, text };
+    }
+
     function generarNuevaMinuta() {
-        minutaActual = {
-            desayuno: opcionesMinuta.desayunos[Math.floor(Math.random() * opcionesMinuta.desayunos.length)],
-            colacion1: opcionesMinuta.colaciones1[Math.floor(Math.random() * opcionesMinuta.colaciones1.length)],
-            almuerzo: opcionesMinuta.almuerzos[Math.floor(Math.random() * opcionesMinuta.almuerzos.length)],
-            colacion2: opcionesMinuta.colaciones2[Math.floor(Math.random() * opcionesMinuta.colaciones2.length)],
-            cena: opcionesMinuta.cenas[Math.floor(Math.random() * opcionesMinuta.cenas.length)]
-        };
+        minutaActual = {};
+        let totalCal = 0;
 
-        const totalCal = minutaActual.desayuno.cal + minutaActual.colacion1.cal + minutaActual.almuerzo.cal + minutaActual.colacion2.cal + minutaActual.cena.cal;
+        const html = Object.keys(plantillasMinuta).map(slot => {
+            const plantilla = plantillasMinuta[slot];
+            const comida = armarComida(plantilla.bloques);
+            minutaActual[slot] = comida;
+            totalCal += comida.cal;
+            return `
+                <div class="meal-card">
+                    <div class="meal-info"><strong>${plantilla.icono} ${plantilla.label}</strong>• ${comida.text}</div>
+                    <div class="meal-cal">+${comida.cal} kcal</div>
+                </div>
+            `;
+        }).join('');
+
         document.getElementById('total-calorias-dia').innerText = `${totalCal} kcal`;
-
-        const html = `
-            <div class="meal-card">
-                <div class="meal-info"><strong>🌅 Desayuno</strong>• ${minutaActual.desayuno.text}</div>
-                <div class="meal-cal">+${minutaActual.desayuno.cal} kcal</div>
-            </div>
-            <div class="meal-card">
-                <div class="meal-info"><strong>🍎 Colación 1</strong>• ${minutaActual.colacion1.text}</div>
-                <div class="meal-cal">+${minutaActual.colacion1.cal} kcal</div>
-            </div>
-            <div class="meal-card">
-                <div class="meal-info"><strong>🍽️ Almuerzo</strong>• ${minutaActual.almuerzo.text}</div>
-                <div class="meal-cal">+${minutaActual.almuerzo.cal} kcal</div>
-            </div>
-            <div class="meal-card">
-                <div class="meal-info"><strong>☕ Colación 2</strong>• ${minutaActual.colacion2.text}</div>
-                <div class="meal-cal">+${minutaActual.colacion2.cal} kcal</div>
-            </div>
-            <div class="meal-card">
-                <div class="meal-info"><strong>🌙 Cena</strong>• ${minutaActual.cena.text}</div>
-                <div class="meal-cal">+${minutaActual.cena.cal} kcal</div>
-            </div>
-        `;
         document.getElementById('contenedor-minuta').innerHTML = html;
     }
 
     function asegurarRegistroHoy(fecha) {
         if (!historialDias[fecha]) {
-            historialDias[fecha] = { calorias: 0, desayuno: null, colacion1: null, almuerzo: null, colacion2: null, cena: null, partesMenu: null, entrenamiento: null, agua: 0 };
+            historialDias[fecha] = { calorias: 0, desayuno: null, colacion1: null, almuerzo: null, colacion2: null, cena: null, itemsUsados: null, entrenamiento: null, agua: 0 };
         }
     }
 
@@ -1156,27 +1290,18 @@
             return;
         }
 
-        const partes = [minutaActual.desayuno, minutaActual.colacion1, minutaActual.almuerzo, minutaActual.colacion2, minutaActual.cena];
-        let totalCal = partes.reduce((acc, p) => acc + p.cal, 0);
-        
-        partes.forEach(parte => {
-            if(parte.itemPollo) despensa.pollo.stock = Math.max(0, despensa.pollo.stock - parte.itemPollo);
-            if(parte.itemPaleta) despensa.paleta.stock = Math.max(0, despensa.paleta.stock - parte.itemPaleta);
-            if(parte.itemAtun) despensa.atun.stock = Math.max(0, despensa.atun.stock - parte.itemAtun);
-            if(parte.itemHuevos) despensa.huevos.stock = Math.max(0, despensa.huevos.stock - parte.itemHuevos);
-            if(parte.itemLeche) despensa.leche.stock = Math.max(0, Number((despensa.leche.stock - parte.itemLeche).toFixed(1)));
-            if(parte.itemYogurt) despensa.yogurt.stock = Math.max(0, despensa.yogurt.stock - parte.itemYogurt);
-            if(parte.itemQuesillo) despensa.quesillo.stock = Math.max(0, Number((despensa.quesillo.stock - parte.itemQuesillo).toFixed(1)));
-            if(parte.itemPan) despensa.pan.stock = Math.max(0, despensa.pan.stock - parte.itemPan);
-            if(parte.itemAvena) despensa.avena.stock = Math.max(0, despensa.avena.stock - parte.itemAvena);
-            if(parte.itemArroz) despensa.arrozFideos.stock = Math.max(0, despensa.arrozFideos.stock - parte.itemArroz);
-            if(parte.itemGalletas) despensa.galletas.stock = Math.max(0, Number((despensa.galletas.stock - parte.itemGalletas).toFixed(1)));
-            if(parte.itemAlmendras) despensa.almendras.stock = Math.max(0, despensa.almendras.stock - parte.itemAlmendras);
-            if(parte.itemPalta) despensa.palta.stock = Math.max(0, despensa.palta.stock - parte.itemPalta);
-            if(parte.itemTomate) despensa.tomate.stock = Math.max(0, despensa.tomate.stock - parte.itemTomate);
-            if(parte.itemZanahoria) despensa.zanahoria.stock = Math.max(0, despensa.zanahoria.stock - parte.itemZanahoria);
-            if(parte.itemPapas) despensa.papas.stock = Math.max(0, despensa.papas.stock - parte.itemPapas);
-            if(parte.itemFrutas) despensa.frutas.stock = Math.max(0, despensa.frutas.stock - parte.itemFrutas);
+        const slots = Object.keys(plantillasMinuta);
+        let totalCal = 0;
+        let itemsUsados = [];
+
+        slots.forEach(slot => {
+            const comida = minutaActual[slot];
+            if (!comida) return;
+            totalCal += comida.cal;
+            comida.items.forEach(i => {
+                ajustarStock(i.key, -i.racion);
+                itemsUsados.push({ key: i.key, racion: i.racion });
+            });
         });
 
         historialDias[fechaHoy].calorias = totalCal;
@@ -1185,7 +1310,7 @@
         historialDias[fechaHoy].almuerzo = minutaActual.almuerzo.text;
         historialDias[fechaHoy].colacion2 = minutaActual.colacion2.text;
         historialDias[fechaHoy].cena = minutaActual.cena.text;
-        historialDias[fechaHoy].partesMenu = partes;
+        historialDias[fechaHoy].itemsUsados = itemsUsados;
 
         guardarDatosEnLocal();
         actualizarMascotaSegunEstado('comida');
@@ -1220,27 +1345,13 @@
         const confirmado = await mostrarConfirm(`¿Eliminar el registro del día ${fecha}? Si tenías alimentos guardados, se devolverán al stock.`);
         if (confirmado) {
             let datos = historialDias[fecha];
-            
-            if (datos && datos.partesMenu) {
-                datos.partesMenu.forEach(parte => {
-                    if(parte.itemPollo) despensa.pollo.stock += parte.itemPollo;
-                    if(parte.itemPaleta) despensa.paleta.stock += parte.itemPaleta;
-                    if(parte.itemAtun) despensa.atun.stock += parte.itemAtun;
-                    if(parte.itemHuevos) despensa.huevos.stock += parte.itemHuevos;
-                    if(parte.itemLeche) despensa.leche.stock = Number((despensa.leche.stock + parte.itemLeche).toFixed(1));
-                    if(parte.itemYogurt) despensa.yogurt.stock += parte.itemYogurt;
-                    if(parte.itemQuesillo) despensa.quesillo.stock = Number((despensa.quesillo.stock + parte.itemQuesillo).toFixed(1));
-                    if(parte.itemPan) despensa.pan.stock += parte.itemPan;
-                    if(parte.itemAvena) despensa.avena.stock += parte.itemAvena;
-                    if(parte.itemArroz) despensa.arrozFideos.stock += parte.itemArroz;
-                    if(parte.itemGalletas) despensa.galletas.stock = Number((despensa.galletas.stock + parte.itemGalletas).toFixed(1));
-                    if(parte.itemAlmendras) despensa.almendras.stock += parte.itemAlmendras;
-                    if(parte.itemPalta) despensa.palta.stock += parte.itemPalta;
-                    if(parte.itemTomate) despensa.tomate.stock += parte.itemTomate;
-                    if(parte.itemZanahoria) despensa.zanahoria.stock += parte.itemZanahoria;
-                    if(parte.itemPapas) despensa.papas.stock += parte.itemPapas;
-                    if(parte.itemFrutas) despensa.frutas.stock += parte.itemFrutas;
-                });
+            let mensaje = '🗑️ Registro eliminado y stock devuelto correctamente.';
+
+            if (datos && datos.itemsUsados) {
+                datos.itemsUsados.forEach(u => ajustarStock(u.key, u.racion));
+            } else if (datos && datos.partesMenu) {
+                // Registro antiguo (de antes de esta actualización): no se puede devolver automáticamente.
+                mensaje = 'ℹ️ Registro eliminado. Es un registro antiguo, así que revisa manualmente tu stock si corresponde.';
             }
 
             delete historialDias[fecha];
@@ -1249,12 +1360,13 @@
             actualizarUIAgua();
             actualizarMascotaSegunEstado('idle');
             actualizarIndicadorNivel();
-            mostrarToast('🗑️ Registro eliminado y stock devuelto correctamente.');
+            mostrarToast(mensaje);
         }
     }
 
     async function editarStock(key) {
         let item = despensa[key];
+        if (!item) { renderizarDespensa(); return; }
         let nuevoValor = await mostrarPromptStock(item.nombre, item.stock, item.unidad);
         if (nuevoValor !== null) {
             item.stock = nuevoValor;
@@ -1281,23 +1393,102 @@
     }
 
     function renderizarDespensa() {
-        const p = ['pollo', 'paleta', 'atun', 'huevos', 'leche', 'yogurt', 'quesillo'];
-        const c = ['pan', 'avena', 'arrozFideos', 'galletas', 'mani', 'almendras'];
-        const f = ['palta', 'lechuga', 'tomate', 'zanahoria', 'papas', 'frutas'];
+        categoriasDespensa.forEach(cat => {
+            const claves = Object.keys(despensa).filter(k => (despensa[k].categoria || 'otros') === cat.id);
+            const contenedor = document.getElementById('grid-' + cat.id);
+            if (!contenedor) return;
+            contenedor.innerHTML = claves.length
+                ? claves.map(k => crearItemHtml(k, despensa[k])).join('')
+                : '<p style="font-size:0.7rem;color:var(--text-muted);grid-column:1/-1;">No hay productos en esta categoría todavía.</p>';
+        });
+    }
 
-        document.getElementById('grid-proteinas').innerHTML = p.map(k => crearItemHtml(k, despensa[k])).join('');
-        document.getElementById('grid-cereales').innerHTML = c.map(k => crearItemHtml(k, despensa[k])).join('');
-        document.getElementById('grid-frescos').innerHTML = f.map(k => crearItemHtml(k, despensa[k])).join('');
+    function agregarProductoPersonalizado() {
+        const nombreInput = document.getElementById('nuevo-stock-nombre');
+        const cantidadInput = document.getElementById('nuevo-stock-cantidad');
+        const unidadInput = document.getElementById('nuevo-stock-unidad');
+        const categoriaInput = document.getElementById('nuevo-stock-categoria');
+        const racionInput = document.getElementById('nuevo-stock-racion');
+        const caloriasInput = document.getElementById('nuevo-stock-calorias');
+
+        const nombre = nombreInput.value.trim();
+        const cantidad = parseFloat(cantidadInput.value);
+        const unidad = unidadInput.value.trim();
+        const categoria = categoriaInput.value;
+        const racion = parseFloat(racionInput.value);
+        const calorias = parseFloat(caloriasInput.value);
+
+        if (!nombre) { mostrarToast('⚠️ Escribe un nombre para el producto.', 2600, true); return; }
+        if (!unidad) { mostrarToast('⚠️ Escribe una unidad de medida (g, ml, unid...).', 2600, true); return; }
+        if (isNaN(cantidad) || cantidad < 0) { mostrarToast('⚠️ Ingresa una cantidad válida.', 2600, true); return; }
+        if (racionInput.value.trim() !== '' && (isNaN(racion) || racion <= 0)) { mostrarToast('⚠️ La ración debe ser un número mayor a 0.', 2800, true); return; }
+        if (caloriasInput.value.trim() !== '' && (isNaN(calorias) || calorias < 0)) { mostrarToast('⚠️ Las calorías deben ser un número válido.', 2800, true); return; }
+
+        const key = 'custom_' + Date.now();
+        despensa[key] = { nombre, stock: cantidad, max: cantidad, unidad, categoria };
+        if (racionInput.value.trim() !== '' && caloriasInput.value.trim() !== '') {
+            despensa[key].racion = racion;
+            despensa[key].calorias = calorias;
+        }
+        guardarDatosEnLocal();
+        renderizarDespensa();
+
+        nombreInput.value = '';
+        cantidadInput.value = '';
+        unidadInput.value = '';
+        racionInput.value = '';
+        caloriasInput.value = '';
+
+        mostrarToast(`📦 "${nombre}" agregado a tu despensa.`);
+    }
+
+    async function eliminarProductoPersonalizado(key) {
+        const item = despensa[key];
+        if (!item) return;
+        const confirmado = await mostrarConfirm(`¿Eliminar "${item.nombre}" de tu despensa? Esta acción no se puede deshacer.`);
+        if (confirmado) {
+            delete despensa[key];
+            guardarDatosEnLocal();
+            renderizarDespensa();
+            mostrarToast(`🗑️ "${item.nombre}" eliminado de la despensa.`);
+        }
+    }
+
+    async function editarRacion(key) {
+        const item = despensa[key];
+        if (!item) return;
+        const resultado = await mostrarPromptRacion(item);
+        if (resultado === null) return;
+        if (resultado.racion === null) {
+            delete item.racion;
+            delete item.calorias;
+            mostrarToast(`ℹ️ "${item.nombre}" ya no participa en el sorteo automático de comidas.`);
+        } else {
+            item.racion = resultado.racion;
+            item.calorias = resultado.calorias;
+            mostrarToast(`🎲 "${item.nombre}" ahora puede salir en la Minuta automática.`);
+        }
+        guardarDatosEnLocal();
+        renderizarDespensa();
     }
 
     function crearItemHtml(key, item) {
+        if (!item) return '';
         let esBajo = item.stock <= 0;
+        let infoMinuta = (item.racion && item.calorias !== undefined)
+            ? `<span class="pantry-minuta-info">🎲 ${item.racion} ${item.unidad} ≈ ${item.calorias} kcal</span>`
+            : `<span class="pantry-minuta-info muted">Sin datos para minuta automática</span>`;
         return `
             <div class="pantry-item ${esBajo ? 'bajo' : ''}">
                 <span>${item.nombre}</span>
+                ${infoMinuta}
                 <div class="stock-row">
                     <span class="stock">${item.stock} ${item.unidad}</span>
-                    <button class="btn-edit" onclick="editarStock('${key}')">Editar</button>
+                    <div style="display:flex; gap:4px;">
+                        <button class="btn-edit" onclick="editarStock('${key}')">Editar</button>
+                        <button class="btn-edit" onclick="editarRacion('${key}')" title="Configurar ración y calorías para la minuta">🎯</button>
+                        <button class="btn-edit btn-edit-danger" onclick="eliminarProductoPersonalizado('${key}')" title="Eliminar producto">🗑️</button>
+                    </div>
                 </div>
             </div>
         `;
