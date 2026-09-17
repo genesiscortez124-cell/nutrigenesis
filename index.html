@@ -5,29 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
     <title>NutriGenesis Pro - Historial Detallado</title>
     <style>
         :root {
-            --bg-dark: #170f2e;
-            --card-dark: #221a3d;
-            --primary: #22c55e;
-            --primary-glow: rgba(34, 197, 94, 0.25);
-            --accent: #8b5cf6;
-            --accent-warm: #fb923c;
-            --pink: #ec4899;
-            --gold: #fbbf24;
-            --text-main: #f8fafc;
-            --text-muted: #a5a0c2;
-            --danger: #ef4444;
-            --radius: 20px;
+            --bg-dark: #0f2420;
+            --bg-darker: #091613;
+            --card-dark: #17322a;
+            --card-soft: #1d3b30;
+            --line: #2a4a3d;
+            --primary: #5fb87a;
+            --primary-strong: #3f9c5c;
+            --primary-glow: rgba(95, 184, 122, 0.28);
+            --accent: #8a5a3b;
+            --accent-warm: #f2a541;
+            --pink: #e2574c;
+            --gold: #ffce54;
+            --text-main: #f7f2e6;
+            --text-muted: #9db6aa;
+            --danger: #e5484d;
+            --radius: 22px;
             --font-display: 'Baloo 2', system-ui, sans-serif;
-            --font-body: 'Manrope', system-ui, sans-serif;
+            --font-body: 'Nunito', system-ui, sans-serif;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-body); }
         h1, h2, .app-header-text h1, .modal-header h2 { font-family: var(--font-display); }
         body {
-            background: radial-gradient(circle at top, #2a1f4d 0%, #170f2e 100%);
+            background: radial-gradient(circle at top, #1c3a30 0%, var(--bg-darker) 100%);
             color: var(--text-main);
             display: flex;
             justify-content: center;
@@ -40,12 +44,12 @@
             max-width: 440px;
             background: var(--card-dark);
             border-radius: 40px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 25px 55px -12px rgba(0, 0, 0, 0.85);
             overflow: hidden;
             display: flex;
             flex-direction: column;
             height: 94vh;
-            border: 4px solid #382a5e;
+            border: 4px solid #24463a;
             position: relative;
         }
         .app-header {
@@ -73,8 +77,8 @@
 
         /* Franja hero de la mascota */
         .mascot-hero {
-            background: linear-gradient(180deg, rgba(139,92,246,0.35), transparent);
-            padding: 14px 16px 10px;
+            background: linear-gradient(180deg, rgba(242, 165, 65, 0.20), transparent);
+            padding: 14px 16px 12px;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -85,31 +89,83 @@
 
         /* Mascota Super Interactiva */
         .pet-avatar-wrap {
-            width: 58px;
-            height: 58px;
-            min-width: 58px;
-            background: radial-gradient(circle at 35% 30%, rgba(251,191,36,0.35), rgba(139,92,246,0.25));
-            border: 2px solid rgba(251,191,36,0.5);
+            width: 66px;
+            height: 66px;
+            min-width: 66px;
+            position: relative;
+            background: radial-gradient(circle at 35% 30%, rgba(255, 206, 84, 0.35), rgba(138, 90, 59, 0.3));
+            border: 2px solid rgba(255, 206, 84, 0.5);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 18px rgba(251,191,36,0.25);
+            box-shadow: 0 0 18px rgba(255, 206, 84, 0.25);
             animation: float 2.6s ease-in-out infinite;
+            transition: box-shadow 0.4s ease, border-color 0.4s ease;
         }
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-4px); }
         }
 
-        .pet-avatar { font-size: 2rem; transition: transform 0.3s; display: inline-block; }
-        .pet-avatar.happy { animation: jump 0.5s ease; }
+        .fox-mascot { width: 78%; height: 78%; display: block; overflow: visible; }
+        .fox-ear { transform-box: fill-box; transform-origin: 50% 100%; animation: earTwitch 5s ease-in-out infinite; }
+        .fox-ear-right { animation-delay: 0.3s; }
+        @keyframes earTwitch {
+            0%, 82%, 100% { transform: rotate(0deg); }
+            88% { transform: rotate(-7deg); }
+            94% { transform: rotate(5deg); }
+        }
+        .fox-tail { transform-box: fill-box; transform-origin: 15% 15%; animation: tailWag 2.4s ease-in-out infinite; }
+        @keyframes tailWag {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(5deg); }
+        }
+        .fox-eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s ease-in-out infinite; }
+        @keyframes blink {
+            0%, 92%, 100% { transform: scaleY(1); }
+            96% { transform: scaleY(0.12); }
+        }
+        .mouth-happy { opacity: 0; transition: opacity 0.2s ease; }
+        .mouth-idle { transition: opacity 0.2s ease; }
+        .pet-avatar-wrap.happy .mouth-happy { opacity: 1; }
+        .pet-avatar-wrap.happy .mouth-idle { opacity: 0; }
+        .pet-avatar-wrap.happy { animation: float 2.6s ease-in-out infinite, jump 0.5s ease; }
+        .pet-avatar-wrap.happy .fox-tail { animation: tailWag 0.35s ease-in-out infinite; }
 
         @keyframes jump {
             0% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-10px) scale(1.25) rotate(-8deg); }
+            50% { transform: translateY(-10px) scale(1.15) rotate(-6deg); }
             100% { transform: translateY(0) scale(1); }
         }
+
+        .mood-badge {
+            position: absolute;
+            bottom: -3px;
+            right: -3px;
+            width: 22px;
+            height: 22px;
+            background: var(--card-dark);
+            border: 2px solid var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            transform: scale(0);
+            transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+        }
+        .mood-badge.show { transform: scale(1); }
+
+        .pet-avatar-wrap[data-mood="agua"] { border-color: rgba(110,198,241,0.6); box-shadow: 0 0 18px rgba(110,198,241,0.4); }
+        .pet-avatar-wrap[data-mood="agua"] .mood-badge { border-color: #6ec6f1; }
+        .pet-avatar-wrap[data-mood="comida"] { border-color: rgba(95,184,122,0.6); box-shadow: 0 0 18px rgba(95,184,122,0.4); }
+        .pet-avatar-wrap[data-mood="comida"] .mood-badge { border-color: var(--primary); }
+        .pet-avatar-wrap[data-mood="entreno"] { border-color: rgba(255,154,107,0.6); box-shadow: 0 0 18px rgba(255,154,107,0.4); }
+        .pet-avatar-wrap[data-mood="entreno"] .mood-badge { border-color: #ff9a6b; }
+        .pet-avatar-wrap[data-mood="logro"] { border-color: rgba(255,206,84,0.75); box-shadow: 0 0 20px rgba(255,206,84,0.5); }
+        .pet-avatar-wrap[data-mood="perfecto"] { border-color: rgba(255,206,84,0.75); box-shadow: 0 0 20px rgba(255,206,84,0.5); }
 
         .pet-speech {
             font-size: 0.78rem;
@@ -118,17 +174,32 @@
             line-height: 1.25;
             text-align: left;
             flex: 1;
+            position: relative;
+            background: rgba(0,0,0,0.18);
+            padding: 8px 12px;
+            border-radius: 14px;
         }
-        .pet-hint { font-size: 0.62rem; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+        .pet-speech::before {
+            content: "";
+            position: absolute;
+            left: -5px;
+            top: 14px;
+            width: 10px;
+            height: 10px;
+            background: rgba(0,0,0,0.18);
+            transform: rotate(45deg);
+            border-radius: 2px;
+        }
+        .pet-hint { font-size: 0.62rem; color: rgba(255,255,255,0.75); font-weight: 600; margin-top: 5px; margin-left: 12px; }
 
         /* Pestañas */
         .nav-tabs {
             display: flex;
-            background: rgba(0,0,0,0.25);
+            background: rgba(0,0,0,0.22);
             padding: 5px;
             gap: 3px;
             margin: 12px 12px 0;
-            border-radius: 14px;
+            border-radius: 16px;
             overflow-x: auto;
         }
         .tab-btn {
@@ -139,15 +210,15 @@
             font-size: 0.65rem;
             font-weight: 700;
             color: var(--text-muted);
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.25s ease;
             white-space: nowrap;
         }
         .tab-btn.active {
             background: linear-gradient(135deg, var(--accent-warm), var(--pink));
             color: white;
-            box-shadow: 0 4px 14px rgba(236, 72, 153, 0.35);
+            box-shadow: 0 4px 14px rgba(226, 87, 76, 0.35);
         }
 
         .app-body {
@@ -164,39 +235,39 @@
         }
 
         .card {
-            background: #1a1332;
-            border: 1px solid #3a2c60;
+            background: var(--card-dark);
+            border: 1px solid var(--line);
             border-radius: var(--radius);
-            padding: 14px;
+            padding: 16px;
             margin-bottom: 14px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.03);
         }
         .card h3 { font-family: var(--font-display); color: var(--gold); font-size: 1rem; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; font-weight: 700; letter-spacing: 0.2px; }
 
         .calories-badge {
-            background: rgba(251, 146, 60, 0.18);
+            background: rgba(242, 165, 65, 0.18);
             color: var(--accent-warm);
             font-size: 0.7rem;
             padding: 3px 8px;
             border-radius: 8px;
             font-weight: 700;
-            border: 1px solid rgba(251, 146, 60, 0.4);
+            border: 1px solid rgba(242, 165, 65, 0.4);
         }
 
         .meal-card {
-            background: #221a3d;
-            padding: 10px;
-            border-radius: 12px;
+            background: var(--card-soft);
+            padding: 10px 12px;
+            border-radius: 14px;
             margin-bottom: 8px;
             border-left: 4px solid var(--accent);
             font-size: 0.8rem;
-            color: #d1cbe8;
+            color: #d9d0c2;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .meal-info strong { color: white; display: block; margin-bottom: 2px; }
-        .meal-cal { font-size: 0.72rem; color: var(--accent-warm); font-weight: bold; background: #150d29; padding: 2px 6px; border-radius: 6px; white-space: nowrap; margin-left: 8px;}
+        .meal-info strong { color: white; display: block; margin-bottom: 2px; font-family: var(--font-display); font-weight: 600; }
+        .meal-cal { font-size: 0.72rem; color: var(--accent-warm); font-weight: bold; background: var(--bg-darker); padding: 2px 6px; border-radius: 6px; white-space: nowrap; margin-left: 8px;}
 
         /* Despensa Editable */
         .pantry-grid {
@@ -206,10 +277,10 @@
             margin-top: 8px;
         }
         .pantry-item {
-            background: #221a3d;
-            border: 1px solid #3a2c60;
+            background: var(--card-soft);
+            border: 1px solid var(--line);
             padding: 8px 10px;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 0.75rem;
             display: flex;
             flex-direction: column;
@@ -218,20 +289,20 @@
         .pantry-item span:first-child { font-weight: bold; color: white; }
         .stock-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
         .pantry-item span.stock { color: var(--primary); font-size: 0.75rem; font-weight: bold; }
-        .pantry-item.bajo { border-color: var(--danger); background: rgba(239, 68, 68, 0.08); }
-        .pantry-item.bajo span.stock { color: #fca5a5; }
+        .pantry-item.bajo { border-color: var(--danger); background: rgba(229, 72, 77, 0.1); }
+        .pantry-item.bajo span.stock { color: #f5a3a3; }
 
         .btn-edit {
-            background: #3a2c60;
+            background: var(--line);
             color: white;
             border: none;
-            padding: 2px 6px;
-            border-radius: 6px;
+            padding: 2px 7px;
+            border-radius: 7px;
             font-size: 0.65rem;
             cursor: pointer;
             font-weight: bold;
         }
-        .btn-edit:hover { background: var(--accent); }
+        .btn-edit:hover { background: var(--accent-warm); color: #2b1400; }
 
         /* Filtros Reporte */
         .filter-box {
@@ -242,33 +313,33 @@
         }
         .filter-box select {
             flex: 1;
-            background: #150d29;
-            border: 1px solid #3a2c60;
+            background: var(--bg-darker);
+            border: 1px solid var(--line);
             color: white;
-            padding: 6px;
-            border-radius: 8px;
+            padding: 7px;
+            border-radius: 10px;
             font-size: 0.75rem;
         }
 
         .history-item {
-            background: #1f2937;
+            background: var(--card-soft);
             border-left: 4px solid var(--primary);
-            padding: 10px;
-            border-radius: 10px;
+            padding: 10px 12px;
+            border-radius: 14px;
             margin-bottom: 10px;
             font-size: 0.78rem;
             position: relative;
         }
-        .history-item .date { font-weight: bold; color: var(--primary); margin-bottom: 6px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
-        .history-meal-line { margin-top: 4px; color: #d1d5db; line-height: 1.3; font-size: 0.75rem; }
-        .history-training { margin-top: 6px; color: #38bdf8; font-weight: bold; }
-        .history-water { margin-top: 4px; color: #60a5fa; font-weight: bold; }
+        .history-item .date { font-weight: bold; color: var(--primary); margin-bottom: 6px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; font-family: var(--font-display); }
+        .history-meal-line { margin-top: 4px; color: #d9d0c2; line-height: 1.3; font-size: 0.75rem; }
+        .history-training { margin-top: 6px; color: #ff9a6b; font-weight: bold; }
+        .history-water { margin-top: 4px; color: #6ec6f1; font-weight: bold; }
         .btn-delete-history {
-            background: rgba(239, 68, 68, 0.2);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.4);
-            padding: 2px 8px;
-            border-radius: 6px;
+            background: rgba(229, 72, 77, 0.18);
+            color: #f5a3a3;
+            border: 1px solid rgba(229, 72, 77, 0.4);
+            padding: 3px 9px;
+            border-radius: 8px;
             font-size: 0.65rem;
             cursor: pointer;
             font-weight: bold;
@@ -301,18 +372,18 @@
             color: white;
             border: none;
             padding: 4px 10px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: bold;
             font-size: 0.75rem;
             cursor: pointer;
         }
         .reporte-contenido-caja {
-            background: #150d29;
+            background: var(--bg-darker);
             padding: 12px;
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 0.78rem;
             margin-bottom: 12px;
-            border: 1px solid #3a2c60;
+            border: 1px solid var(--line);
         }
 
         /* Formularios entrenamiento y metas */
@@ -320,55 +391,59 @@
         .form-group label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
         .form-control {
             width: 100%;
-            background: #150d29;
-            border: 1px solid #3a2c60;
+            background: var(--bg-darker);
+            border: 1px solid var(--line);
             color: white;
-            padding: 8px;
-            border-radius: 8px;
+            padding: 9px 10px;
+            border-radius: 10px;
             font-size: 0.8rem;
         }
 
         /* Botones */
         .btn-action {
-            background: linear-gradient(135deg, var(--primary), #16a34a);
-            color: #0b1120;
+            background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+            color: #05170f;
             border: none;
-            padding: 10px 14px;
-            border-radius: 12px;
+            padding: 11px 14px;
+            border-radius: 999px;
             font-weight: 800;
             font-size: 0.78rem;
             width: 100%;
             cursor: pointer;
             box-shadow: 0 4px 12px var(--primary-glow);
             margin-top: 8px;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
+        .btn-action:active { transform: translateY(2px); box-shadow: 0 2px 6px var(--primary-glow); }
         .btn-secondary {
-            background: linear-gradient(135deg, var(--accent), #6d28d9);
+            background: linear-gradient(135deg, var(--accent), #603a22);
             color: white;
             border: none;
-            padding: 10px 14px;
-            border-radius: 12px;
+            padding: 11px 14px;
+            border-radius: 999px;
             font-weight: 800;
             font-size: 0.78rem;
             width: 100%;
             cursor: pointer;
             margin-top: 6px;
+            transition: transform 0.15s ease;
         }
+        .btn-secondary:active { transform: translateY(2px); }
         .btn-small {
             background: linear-gradient(135deg, var(--accent-warm), var(--pink));
             color: white;
             border: none;
-            padding: 3px 8px;
-            border-radius: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
             font-size: 0.65rem;
             cursor: pointer;
             font-weight: bold;
         }
 
         .progress-container {
-            background: #150d29;
-            border: 1px solid #3a2c60;
-            border-radius: 10px;
+            background: var(--bg-darker);
+            border: 1px solid var(--line);
+            border-radius: 999px;
             height: 10px;
             width: 100%;
             overflow: hidden;
@@ -378,6 +453,7 @@
             background: linear-gradient(90deg, var(--accent-warm), var(--pink));
             height: 100%;
             width: 0%;
+            border-radius: 999px;
             transition: width 0.4s ease;
         }
         .xp-fill { background: linear-gradient(90deg, var(--gold), var(--accent-warm)); }
@@ -389,11 +465,11 @@
             left: 50%;
             bottom: 18px;
             transform: translateX(-50%) translateY(20px);
-            background: #150d29;
+            background: var(--bg-darker);
             border: 1px solid var(--gold);
             color: var(--text-main);
             padding: 10px 16px;
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 0.78rem;
             font-weight: 700;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
@@ -412,7 +488,7 @@
             display: none;
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(9, 22, 19, 0.78);
             backdrop-filter: blur(2px);
             z-index: 250;
             align-items: flex-end;
@@ -421,9 +497,9 @@
         .modal-overlay.open { display: flex; }
         .modal-box {
             background: var(--card-dark);
-            border: 1px solid #374151;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
+            border: 1px solid var(--line);
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
             padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px));
             width: 100%;
             max-width: 440px;
@@ -438,7 +514,7 @@
         .modal-actions { display: flex; gap: 8px; margin-top: 10px; }
         .modal-actions button { margin-top: 0; }
         .input-error { border-color: var(--danger) !important; }
-        .input-error-msg { color: #fca5a5; font-size: 0.7rem; margin-top: 4px; min-height: 14px; }
+        .input-error-msg { color: #f5a3a3; font-size: 0.7rem; margin-top: 4px; min-height: 14px; }
 
         /* Sistema de Logros / XP */
         .xp-header { display: flex; align-items: center; gap: 12px; }
@@ -449,10 +525,10 @@
             font-weight: 800;
             font-size: 0.85rem;
             padding: 8px 12px;
-            border-radius: 14px;
+            border-radius: 14px 14px 6px 6px;
             text-align: center;
             min-width: 54px;
-            box-shadow: 0 4px 10px rgba(251, 191, 36, 0.3);
+            box-shadow: 0 4px 10px rgba(255, 206, 84, 0.3);
         }
         .xp-bar-wrap { flex: 1; }
 
@@ -463,21 +539,31 @@
             margin-top: 8px;
         }
         .logro-item {
-            background: #150d29;
-            border: 1px solid #3a2c60;
-            border-radius: 14px;
-            padding: 10px;
+            background: var(--card-soft);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 12px 10px;
             text-align: center;
             transition: transform 0.2s;
         }
         .logro-item.unlocked {
             border-color: var(--gold);
-            background: linear-gradient(160deg, rgba(251,191,36,0.12), #150d29 60%);
-            box-shadow: 0 4px 14px rgba(251, 191, 36, 0.15);
+            background: radial-gradient(160% 140% at 50% -20%, rgba(255,206,84,0.18), var(--card-soft) 60%);
+            box-shadow: 0 4px 14px rgba(255, 206, 84, 0.15);
         }
         .logro-item.locked { opacity: 0.45; filter: grayscale(0.6); }
-        .logro-icon { font-size: 1.7rem; display: block; margin-bottom: 4px; }
-        .logro-title { font-size: 0.72rem; font-weight: 800; color: white; display: block; }
+        .logro-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 6px;
+            background: rgba(0,0,0,0.18);
+            border-radius: 50%;
+        }
+        .logro-title { font-size: 0.72rem; font-weight: 800; color: white; display: block; font-family: var(--font-display); }
         .logro-desc { font-size: 0.63rem; color: var(--text-muted); display: block; margin-top: 2px; line-height: 1.25; }
     </style>
 </head>
@@ -487,7 +573,7 @@
     <!-- Header con Mascota Super Interactiva -->
     <div class="app-header">
         <div class="app-header-text">
-            <h1>⚡ NutriGenesis</h1>
+            <h1>🍂 NutriGenesis</h1>
             <p>Control & Hábitos</p>
         </div>
         <div class="xp-pill" id="header-xp-pill">Nv. 1</div>
@@ -495,8 +581,35 @@
 
     <!-- Franja Hero: Mascota grande -->
     <div class="mascot-hero" onclick="interactuarMascota()" title="¡Tócame para hablar!" role="button" tabindex="0" aria-label="Hablar con la mascota" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();interactuarMascota();}">
-        <div class="pet-avatar-wrap">
-            <div class="pet-avatar" id="pet-emoji">🦊</div>
+        <div class="pet-avatar-wrap" id="pet-avatar-wrap">
+            <svg class="fox-mascot" id="pet-emoji" viewBox="0 0 100 100" role="img" aria-label="Kori, la mascota zorro">
+                <g class="fox-tail">
+                    <ellipse cx="80" cy="70" rx="13" ry="19" transform="rotate(-25 80 70)" fill="var(--accent-warm)"/>
+                    <ellipse cx="85" cy="83" rx="6.5" ry="8.5" transform="rotate(-25 85 83)" fill="var(--text-main)"/>
+                </g>
+                <g class="fox-ear fox-ear-left">
+                    <polygon points="20,36 31,6 41,38" fill="var(--accent-warm)"/>
+                    <polygon points="25,31 31,15 35,32" fill="var(--text-main)"/>
+                </g>
+                <g class="fox-ear fox-ear-right">
+                    <polygon points="80,36 69,6 59,38" fill="var(--accent-warm)"/>
+                    <polygon points="75,31 69,15 65,32" fill="var(--text-main)"/>
+                </g>
+                <ellipse cx="50" cy="56" rx="34" ry="30" fill="var(--accent-warm)"/>
+                <ellipse cx="50" cy="66" rx="20" ry="16" fill="var(--text-main)"/>
+                <circle cx="27" cy="60" r="5" fill="var(--pink)" opacity="0.45"/>
+                <circle cx="73" cy="60" r="5" fill="var(--pink)" opacity="0.45"/>
+                <g class="fox-eyes">
+                    <ellipse cx="38" cy="51" rx="5" ry="6.5" fill="#22150c"/>
+                    <ellipse cx="62" cy="51" rx="5" ry="6.5" fill="#22150c"/>
+                    <circle cx="40" cy="48" r="1.6" fill="#fff"/>
+                    <circle cx="64" cy="48" r="1.6" fill="#fff"/>
+                </g>
+                <ellipse cx="50" cy="65" rx="4" ry="3" fill="var(--accent)"/>
+                <path class="mouth-idle" d="M42,72 Q50,78 58,72" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+                <path class="mouth-happy" d="M43,71 Q50,83 57,71 Q50,77 43,71 Z" fill="var(--accent)"/>
+            </svg>
+            <div class="mood-badge" id="mood-badge"></div>
         </div>
         <div>
             <div class="pet-speech" id="pet-text">¡Hola! ¿Qué comemos hoy?</div>
@@ -791,10 +904,12 @@
     }
 
     function actualizarMascotaSegunEstado(tipoAccion = 'idle') {
-        const emojiEl = document.getElementById('pet-emoji');
+        const wrapEl = document.getElementById('pet-avatar-wrap');
+        const badgeEl = document.getElementById('mood-badge');
         const textEl = document.getElementById('pet-text');
-        
-        let emoji = "🦊";
+
+        let mood = "idle";
+        let badge = "";
         let mensaje = "¡Hola! ¿Qué comemos hoy?";
 
         const fechaHoy = obtenerFechaHoyStr();
@@ -803,16 +918,16 @@
         const tieneEntreno = historialDias[fechaHoy]?.entrenamiento;
 
         if (tipoAccion === 'agua') {
-            emoji = "🦊💧";
+            mood = "agua"; badge = "💧";
             mensaje = agua >= 2000 ? "¡Meta de agua completa! 🌟" : "¡Glup glup! Sigue tomando agua 💧";
         } else if (tipoAccion === 'comida') {
-            emoji = "🦊🥗";
+            mood = "comida"; badge = "🥗";
             mensaje = "¡Ñam! Alimento guardado y descontado 👏";
         } else if (tipoAccion === 'entreno') {
-            emoji = "🦊🔥";
+            mood = "entreno"; badge = "🔥";
             mensaje = "¡Qué gran energía en tu entrenamiento! 🚀";
         } else if (tipoAccion === 'logro') {
-            emoji = "🦊🏆";
+            mood = "logro"; badge = "🏆";
             mensaje = "¡Insignia nueva desbloqueada! Revisa Logros 🎉";
         } else if (tipoAccion === 'tocado') {
             const listaFrases = [
@@ -822,26 +937,28 @@
                 agua < 1000 ? "¡Tengo sed de agua, recuerda tomar! 💧" : "¡Estás cumpliendo todas tus metas! 🏆",
                 tieneMenu ? "¡Ya comiste rico hoy! 🍽️" : "¡No olvides registrar tu menú de hoy! 📝"
             ];
-            emoji = "🦊✨";
+            mood = "tocado"; badge = "✨";
             mensaje = listaFrases[Math.floor(Math.random() * listaFrases.length)];
         } else {
             if (agua >= 2000 && tieneMenu) {
-                emoji = "🦊🌟";
+                mood = "perfecto"; badge = "🌟";
                 mensaje = "¡Día perfecto completado! Estoy orgulloso. 🥳";
             } else if (tieneEntreno) {
-                emoji = "🦊💪";
+                mood = "entreno"; badge = "💪";
                 mensaje = "¡Imparable con el ejercicio! Sigue así.";
             } else {
-                emoji = "🦊🥕";
+                mood = "idle"; badge = "🥕";
                 mensaje = "¡Vamos a cumplir las metas de hoy! 💪";
             }
         }
 
-        emojiEl.innerText = emoji;
         textEl.innerText = mensaje;
-        emojiEl.classList.remove('happy');
-        void emojiEl.offsetWidth; 
-        emojiEl.classList.add('happy');
+        wrapEl.dataset.mood = mood;
+        badgeEl.innerText = badge;
+        badgeEl.classList.toggle('show', badge !== "");
+        wrapEl.classList.remove('happy');
+        void wrapEl.offsetWidth;
+        wrapEl.classList.add('happy');
     }
 
     function interactuarMascota() {
