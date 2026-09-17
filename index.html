@@ -3,22 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
     <title>NutriGenesis Pro - Historial Detallado</title>
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --card-dark: #1e293b;
-            --primary: #10b981;
-            --primary-glow: rgba(16, 185, 129, 0.2);
-            --accent: #3b82f6;
+            --bg-dark: #170f2e;
+            --card-dark: #221a3d;
+            --primary: #22c55e;
+            --primary-glow: rgba(34, 197, 94, 0.25);
+            --accent: #8b5cf6;
+            --accent-warm: #fb923c;
+            --pink: #ec4899;
+            --gold: #fbbf24;
             --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --text-muted: #a5a0c2;
             --danger: #ef4444;
             --radius: 20px;
+            --font-display: 'Baloo 2', system-ui, sans-serif;
+            --font-body: 'Manrope', system-ui, sans-serif;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-body); }
+        h1, h2, .app-header-text h1, .modal-header h2 { font-family: var(--font-display); }
         body {
-            background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+            background: radial-gradient(circle at top, #2a1f4d 0%, #170f2e 100%);
             color: var(--text-main);
             display: flex;
             justify-content: center;
@@ -31,67 +40,91 @@
             max-width: 440px;
             background: var(--card-dark);
             border-radius: 40px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
             overflow: hidden;
             display: flex;
             flex-direction: column;
             height: 94vh;
-            border: 4px solid #334155;
+            border: 4px solid #382a5e;
             position: relative;
         }
         .app-header {
-            background: linear-gradient(135deg, #059669, #10b981);
+            background: linear-gradient(135deg, var(--accent-warm) 0%, var(--pink) 55%, var(--accent) 100%);
             color: white;
-            padding: 15px 18px;
+            padding: 14px 18px 10px;
             text-align: center;
-            border-bottom-left-radius: 30px;
-            border-bottom-right-radius: 30px;
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.15);
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
-        .app-header-text h1 { font-size: 1.2rem; font-weight: 800; text-align: left; }
-        .app-header-text p { font-size: 0.7rem; opacity: 0.9; text-align: left; margin-top: 1px; }
+        .app-header-text h1 { font-size: 1.3rem; font-weight: 800; text-align: left; letter-spacing: 0.3px; }
+        .app-header-text p { font-size: 0.68rem; opacity: 0.95; text-align: left; margin-top: 1px; font-weight: 700; }
 
-        /* Mascota Super Interactiva */
-        .pet-container {
+        .xp-pill {
+            background: rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 3px 9px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        /* Franja hero de la mascota */
+        .mascot-hero {
+            background: linear-gradient(180deg, rgba(139,92,246,0.35), transparent);
+            padding: 14px 16px 10px;
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 6px 10px;
-            border-radius: 20px;
-            gap: 8px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            gap: 12px;
             cursor: pointer;
-            transition: transform 0.2s, background 0.3s;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
-        .pet-container:hover { background: rgba(255, 255, 255, 0.25); }
-        .pet-container:active { transform: scale(0.90); }
-        
-        .pet-avatar { font-size: 1.6rem; transition: transform 0.3s; }
+        .mascot-hero:active { transform: scale(0.98); }
+
+        /* Mascota Super Interactiva */
+        .pet-avatar-wrap {
+            width: 58px;
+            height: 58px;
+            min-width: 58px;
+            background: radial-gradient(circle at 35% 30%, rgba(251,191,36,0.35), rgba(139,92,246,0.25));
+            border: 2px solid rgba(251,191,36,0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 18px rgba(251,191,36,0.25);
+            animation: float 2.6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        .pet-avatar { font-size: 2rem; transition: transform 0.3s; display: inline-block; }
         .pet-avatar.happy { animation: jump 0.5s ease; }
 
         @keyframes jump {
             0% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-10px) scale(1.2); }
+            50% { transform: translateY(-10px) scale(1.25) rotate(-8deg); }
             100% { transform: translateY(0) scale(1); }
         }
 
         .pet-speech {
-            font-size: 0.65rem;
+            font-size: 0.78rem;
             font-weight: 700;
             color: #fff;
-            max-width: 115px;
-            line-height: 1.2;
+            line-height: 1.25;
             text-align: left;
+            flex: 1;
         }
+        .pet-hint { font-size: 0.62rem; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
 
         /* Pestañas */
         .nav-tabs {
             display: flex;
-            background: #0f172a;
+            background: rgba(0,0,0,0.25);
             padding: 5px;
             gap: 3px;
             margin: 12px 12px 0;
@@ -112,9 +145,9 @@
             white-space: nowrap;
         }
         .tab-btn.active {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--accent-warm), var(--pink));
             color: white;
-            box-shadow: 0 4px 12px var(--primary-glow);
+            box-shadow: 0 4px 14px rgba(236, 72, 153, 0.35);
         }
 
         .app-body {
@@ -131,39 +164,39 @@
         }
 
         .card {
-            background: #111827;
-            border: 1px solid #374151;
+            background: #1a1332;
+            border: 1px solid #3a2c60;
             border-radius: var(--radius);
             padding: 14px;
             margin-bottom: 14px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
         }
-        .card h3 { color: var(--primary); font-size: 0.9rem; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; font-weight: 700; }
+        .card h3 { font-family: var(--font-display); color: var(--gold); font-size: 1rem; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; font-weight: 700; letter-spacing: 0.2px; }
 
         .calories-badge {
-            background: rgba(16, 185, 129, 0.15);
-            color: #34d399;
+            background: rgba(251, 146, 60, 0.18);
+            color: var(--accent-warm);
             font-size: 0.7rem;
             padding: 3px 8px;
             border-radius: 8px;
             font-weight: 700;
-            border: 1px solid rgba(16, 185, 129, 0.3);
+            border: 1px solid rgba(251, 146, 60, 0.4);
         }
 
         .meal-card {
-            background: #1f2937;
+            background: #221a3d;
             padding: 10px;
             border-radius: 12px;
             margin-bottom: 8px;
             border-left: 4px solid var(--accent);
             font-size: 0.8rem;
-            color: #d1d5db;
+            color: #d1cbe8;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .meal-info strong { color: white; display: block; margin-bottom: 2px; }
-        .meal-cal { font-size: 0.72rem; color: #34d399; font-weight: bold; background: #111827; padding: 2px 6px; border-radius: 6px; white-space: nowrap; margin-left: 8px;}
+        .meal-cal { font-size: 0.72rem; color: var(--accent-warm); font-weight: bold; background: #150d29; padding: 2px 6px; border-radius: 6px; white-space: nowrap; margin-left: 8px;}
 
         /* Despensa Editable */
         .pantry-grid {
@@ -173,8 +206,8 @@
             margin-top: 8px;
         }
         .pantry-item {
-            background: #1f2937;
-            border: 1px solid #374151;
+            background: #221a3d;
+            border: 1px solid #3a2c60;
             padding: 8px 10px;
             border-radius: 10px;
             font-size: 0.75rem;
@@ -185,11 +218,11 @@
         .pantry-item span:first-child { font-weight: bold; color: white; }
         .stock-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
         .pantry-item span.stock { color: var(--primary); font-size: 0.75rem; font-weight: bold; }
-        .pantry-item.bajo { border-color: var(--danger); background: rgba(239, 68, 68, 0.05); }
+        .pantry-item.bajo { border-color: var(--danger); background: rgba(239, 68, 68, 0.08); }
         .pantry-item.bajo span.stock { color: #fca5a5; }
 
         .btn-edit {
-            background: #374151;
+            background: #3a2c60;
             color: white;
             border: none;
             padding: 2px 6px;
@@ -209,8 +242,8 @@
         }
         .filter-box select {
             flex: 1;
-            background: #1f2937;
-            border: 1px solid #374151;
+            background: #150d29;
+            border: 1px solid #3a2c60;
             color: white;
             padding: 6px;
             border-radius: 8px;
@@ -262,7 +295,7 @@
             padding-bottom: 8px;
             margin-bottom: 12px;
         }
-        .modal-header h2 { font-size: 1rem; color: var(--primary); }
+        .modal-header h2 { font-size: 1.05rem; color: var(--gold); font-family: var(--font-display); }
         .btn-close-modal {
             background: var(--danger);
             color: white;
@@ -274,12 +307,12 @@
             cursor: pointer;
         }
         .reporte-contenido-caja {
-            background: #111827;
+            background: #150d29;
             padding: 12px;
             border-radius: 12px;
             font-size: 0.78rem;
             margin-bottom: 12px;
-            border: 1px solid #374151;
+            border: 1px solid #3a2c60;
         }
 
         /* Formularios entrenamiento y metas */
@@ -287,8 +320,8 @@
         .form-group label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
         .form-control {
             width: 100%;
-            background: #1f2937;
-            border: 1px solid #374151;
+            background: #150d29;
+            border: 1px solid #3a2c60;
             color: white;
             padding: 8px;
             border-radius: 8px;
@@ -297,8 +330,8 @@
 
         /* Botones */
         .btn-action {
-            background: var(--primary);
-            color: #0f172a;
+            background: linear-gradient(135deg, var(--primary), #16a34a);
+            color: #0b1120;
             border: none;
             padding: 10px 14px;
             border-radius: 12px;
@@ -310,7 +343,7 @@
             margin-top: 8px;
         }
         .btn-secondary {
-            background: var(--accent);
+            background: linear-gradient(135deg, var(--accent), #6d28d9);
             color: white;
             border: none;
             padding: 10px 14px;
@@ -322,7 +355,7 @@
             margin-top: 6px;
         }
         .btn-small {
-            background: #3b82f6;
+            background: linear-gradient(135deg, var(--accent-warm), var(--pink));
             color: white;
             border: none;
             padding: 3px 8px;
@@ -333,7 +366,8 @@
         }
 
         .progress-container {
-            background: #374151;
+            background: #150d29;
+            border: 1px solid #3a2c60;
             border-radius: 10px;
             height: 10px;
             width: 100%;
@@ -341,12 +375,110 @@
             margin: 8px 0;
         }
         .progress-fill {
-            background: linear-gradient(90deg, #3b82f6, #10b981);
+            background: linear-gradient(90deg, var(--accent-warm), var(--pink));
             height: 100%;
             width: 0%;
             transition: width 0.4s ease;
         }
+        .xp-fill { background: linear-gradient(90deg, var(--gold), var(--accent-warm)); }
         .clearfix::after { content: ""; clear: both; display: table; }
+
+        /* Toast de notificación (reemplaza alert()) */
+        .toast {
+            position: absolute;
+            left: 50%;
+            bottom: 18px;
+            transform: translateX(-50%) translateY(20px);
+            background: #150d29;
+            border: 1px solid var(--gold);
+            color: var(--text-main);
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            z-index: 300;
+            max-width: 85%;
+            text-align: center;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.danger { border-color: var(--danger); }
+
+        /* Modales de confirmación / edición (reemplazan confirm() y prompt()) */
+        .modal-overlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(2px);
+            z-index: 250;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--card-dark);
+            border: 1px solid #374151;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+            width: 100%;
+            max-width: 440px;
+            animation: slideUp 0.25s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-box p.modal-msg { font-size: 0.85rem; color: var(--text-main); margin-bottom: 14px; line-height: 1.4; }
+        .modal-box label.modal-label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
+        .modal-actions { display: flex; gap: 8px; margin-top: 10px; }
+        .modal-actions button { margin-top: 0; }
+        .input-error { border-color: var(--danger) !important; }
+        .input-error-msg { color: #fca5a5; font-size: 0.7rem; margin-top: 4px; min-height: 14px; }
+
+        /* Sistema de Logros / XP */
+        .xp-header { display: flex; align-items: center; gap: 12px; }
+        .xp-level-badge {
+            font-family: var(--font-display);
+            background: linear-gradient(135deg, var(--gold), var(--accent-warm));
+            color: #2b1400;
+            font-weight: 800;
+            font-size: 0.85rem;
+            padding: 8px 12px;
+            border-radius: 14px;
+            text-align: center;
+            min-width: 54px;
+            box-shadow: 0 4px 10px rgba(251, 191, 36, 0.3);
+        }
+        .xp-bar-wrap { flex: 1; }
+
+        .logros-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .logro-item {
+            background: #150d29;
+            border: 1px solid #3a2c60;
+            border-radius: 14px;
+            padding: 10px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .logro-item.unlocked {
+            border-color: var(--gold);
+            background: linear-gradient(160deg, rgba(251,191,36,0.12), #150d29 60%);
+            box-shadow: 0 4px 14px rgba(251, 191, 36, 0.15);
+        }
+        .logro-item.locked { opacity: 0.45; filter: grayscale(0.6); }
+        .logro-icon { font-size: 1.7rem; display: block; margin-bottom: 4px; }
+        .logro-title { font-size: 0.72rem; font-weight: 800; color: white; display: block; }
+        .logro-desc { font-size: 0.63rem; color: var(--text-muted); display: block; margin-top: 2px; line-height: 1.25; }
     </style>
 </head>
 <body>
@@ -358,9 +490,17 @@
             <h1>⚡ NutriGenesis</h1>
             <p>Control & Hábitos</p>
         </div>
-        <div class="pet-container" onclick="interactuarMascota()" title="¡Tócame para hablar!">
-            <div class="pet-avatar" id="pet-emoji">🐰</div>
+        <div class="xp-pill" id="header-xp-pill">Nv. 1</div>
+    </div>
+
+    <!-- Franja Hero: Mascota grande -->
+    <div class="mascot-hero" onclick="interactuarMascota()" title="¡Tócame para hablar!" role="button" tabindex="0" aria-label="Hablar con la mascota" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();interactuarMascota();}">
+        <div class="pet-avatar-wrap">
+            <div class="pet-avatar" id="pet-emoji">🦊</div>
+        </div>
+        <div>
             <div class="pet-speech" id="pet-text">¡Hola! ¿Qué comemos hoy?</div>
+            <div class="pet-hint">Toca para hablar con Kori 👋</div>
         </div>
     </div>
 
@@ -370,6 +510,7 @@
         <button class="tab-btn" onclick="switchTab('despensa', this)">Stock 📦</button>
         <button class="tab-btn" onclick="switchTab('historial', this)">Historial 📅</button>
         <button class="tab-btn" onclick="switchTab('metas', this)">Metas</button>
+        <button class="tab-btn" onclick="switchTab('logros', this)">Logros 🏆</button>
     </div>
 
     <div class="app-body">
@@ -393,7 +534,7 @@
             <div class="card">
                 <h3>
                     <span>📦 Inventario Quincenal</span>
-                    <button class="btn-small" style="background: var(--primary); color:#0f172a;" onclick="recargarQuincenaCompleta()">🛒 Recargar Todo</button>
+                    <button class="btn-small" onclick="recargarQuincenaCompleta()">🛒 Recargar Todo</button>
                 </h3>
                 <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 8px;">Edita stock o haz recarga completa quincenal:</p>
                 
@@ -461,6 +602,25 @@
             </div>
         </div>
 
+        <!-- LOGROS -->
+        <div id="logros" class="tab-pane">
+            <div class="card">
+                <h3>🏆 Nivel y Progreso</h3>
+                <div class="xp-header">
+                    <div class="xp-level-badge" id="xp-level-badge">Nv. 1</div>
+                    <div class="xp-bar-wrap">
+                        <div class="progress-container"><div id="xp-bar" class="progress-fill xp-fill"></div></div>
+                        <p id="xp-text" style="font-size: 0.68rem; color: var(--text-muted); margin-top: 4px;">0 / 150 XP</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>🎖️ Insignias</h3>
+                <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px;">Se desbloquean solas según tus hábitos registrados.</p>
+                <div id="grid-logros" class="logros-grid"></div>
+            </div>
+        </div>
+
     </div>
 
     <!-- PANTALLA MODAL DE REPORTE INTERNO -->
@@ -471,6 +631,33 @@
         </div>
         <p style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 10px;">Paciente: Genesis Cortez | <span id="reporte-periodo-lbl"></span></p>
         <div id="cuerpo-reporte-modal"></div>
+    </div>
+
+    <!-- Toast de notificaciones -->
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <!-- Modal de confirmación genérico -->
+    <div id="modal-confirm" class="modal-overlay">
+        <div class="modal-box">
+            <p id="modal-confirm-text" class="modal-msg"></p>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="modal-confirm-cancel" style="background:#374151;">Cancelar</button>
+                <button class="btn-action" id="modal-confirm-ok">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de edición de stock -->
+    <div id="modal-prompt" class="modal-overlay">
+        <div class="modal-box">
+            <label class="modal-label" id="modal-prompt-label">Nueva cantidad:</label>
+            <input type="number" id="modal-prompt-input" class="form-control" min="0" inputmode="decimal">
+            <p class="input-error-msg" id="modal-prompt-error"></p>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="modal-prompt-cancel" style="background:#374151;">Cancelar</button>
+                <button class="btn-action" id="modal-prompt-ok">Guardar</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -501,12 +688,99 @@
     let minutaActual = {};
 
     function guardarDatosEnLocal() {
-        localStorage.setItem('nutri_despensa', JSON.stringify(despensa));
-        localStorage.setItem('nutri_historial', JSON.stringify(historialDias));
+        try {
+            localStorage.setItem('nutri_despensa', JSON.stringify(despensa));
+            localStorage.setItem('nutri_historial', JSON.stringify(historialDias));
+        } catch (e) {
+            mostrarToast('⚠️ No se pudo guardar el progreso en este dispositivo.', 3500, true);
+        }
+    }
+
+    // --- Reemplazos de alert() / confirm() / prompt() con estilo propio ---
+
+    function mostrarToast(mensaje, duracion = 2600, esError = false) {
+        const t = document.getElementById('toast');
+        t.innerText = mensaje;
+        t.classList.toggle('danger', esError);
+        t.classList.add('show');
+        clearTimeout(t._timer);
+        t._timer = setTimeout(() => t.classList.remove('show'), duracion);
+    }
+
+    function mostrarConfirm(texto) {
+        return new Promise(resolve => {
+            const modal = document.getElementById('modal-confirm');
+            document.getElementById('modal-confirm-text').innerText = texto;
+            const btnOk = document.getElementById('modal-confirm-ok');
+            const btnCancel = document.getElementById('modal-confirm-cancel');
+
+            function cerrar(resultado) {
+                modal.classList.remove('open');
+                btnOk.removeEventListener('click', onOk);
+                btnCancel.removeEventListener('click', onCancel);
+                resolve(resultado);
+            }
+            function onOk() { cerrar(true); }
+            function onCancel() { cerrar(false); }
+
+            btnOk.addEventListener('click', onOk);
+            btnCancel.addEventListener('click', onCancel);
+            modal.classList.add('open');
+        });
+    }
+
+    function mostrarPromptStock(nombreItem, valorActual, unidad) {
+        return new Promise(resolve => {
+            const modal = document.getElementById('modal-prompt');
+            const label = document.getElementById('modal-prompt-label');
+            const input = document.getElementById('modal-prompt-input');
+            const errorMsg = document.getElementById('modal-prompt-error');
+            const btnOk = document.getElementById('modal-prompt-ok');
+            const btnCancel = document.getElementById('modal-prompt-cancel');
+
+            label.innerText = `Nueva cantidad para ${nombreItem} (${unidad}):`;
+            input.value = valorActual;
+            input.classList.remove('input-error');
+            errorMsg.innerText = '';
+
+            function validarYCerrar() {
+                const valor = Number(input.value);
+                if (input.value.trim() === '' || isNaN(valor) || valor < 0) {
+                    input.classList.add('input-error');
+                    errorMsg.innerText = 'Ingresa un número válido de 0 o más.';
+                    return;
+                }
+                cerrar(valor);
+            }
+
+            function cerrar(resultado) {
+                modal.classList.remove('open');
+                btnOk.removeEventListener('click', validarYCerrar);
+                btnCancel.removeEventListener('click', onCancel);
+                input.removeEventListener('keydown', onKeyDown);
+                resolve(resultado);
+            }
+            function onCancel() { cerrar(null); }
+            function onKeyDown(e) {
+                if (e.key === 'Enter') validarYCerrar();
+                if (e.key === 'Escape') onCancel();
+            }
+
+            btnOk.addEventListener('click', validarYCerrar);
+            btnCancel.addEventListener('click', onCancel);
+            input.addEventListener('keydown', onKeyDown);
+            modal.classList.add('open');
+            setTimeout(() => input.focus(), 50);
+        });
     }
 
     function obtenerFechaHoyStr() {
-        return new Date().toLocaleDateString('es-CL', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        // Formato ISO (YYYY-MM-DD): ordena bien alfabéticamente y se parsea sin ambigüedad.
+        const hoy = new Date();
+        const anio = hoy.getFullYear();
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        return `${anio}-${mes}-${dia}`;
     }
 
     function obtenerFechaLegible(fechaStr) {
@@ -520,7 +794,7 @@
         const emojiEl = document.getElementById('pet-emoji');
         const textEl = document.getElementById('pet-text');
         
-        let emoji = "🐰";
+        let emoji = "🦊";
         let mensaje = "¡Hola! ¿Qué comemos hoy?";
 
         const fechaHoy = obtenerFechaHoyStr();
@@ -529,33 +803,36 @@
         const tieneEntreno = historialDias[fechaHoy]?.entrenamiento;
 
         if (tipoAccion === 'agua') {
-            emoji = "🐰💧";
+            emoji = "🦊💧";
             mensaje = agua >= 2000 ? "¡Meta de agua completa! 🌟" : "¡Glup glup! Sigue tomando agua 💧";
         } else if (tipoAccion === 'comida') {
-            emoji = "🐰🥗";
+            emoji = "🦊🥗";
             mensaje = "¡Ñam! Alimento guardado y descontado 👏";
         } else if (tipoAccion === 'entreno') {
-            emoji = "🐰🔥";
+            emoji = "🦊🔥";
             mensaje = "¡Qué gran energía en tu entrenamiento! 🚀";
+        } else if (tipoAccion === 'logro') {
+            emoji = "🦊🏆";
+            mensaje = "¡Insignia nueva desbloqueada! Revisa Logros 🎉";
         } else if (tipoAccion === 'tocado') {
             const listaFrases = [
-                "¡Mecachis, me haces cosquillas! ✨",
+                "¡Ja, me haces cosquillas! ✨",
                 "¿Revisamos el stock quincenal? 📦",
                 "¡Hoy será un día genial! 💖",
                 agua < 1000 ? "¡Tengo sed de agua, recuerda tomar! 💧" : "¡Estás cumpliendo todas tus metas! 🏆",
                 tieneMenu ? "¡Ya comiste rico hoy! 🍽️" : "¡No olvides registrar tu menú de hoy! 📝"
             ];
-            emoji = "🐰✨";
+            emoji = "🦊✨";
             mensaje = listaFrases[Math.floor(Math.random() * listaFrases.length)];
         } else {
             if (agua >= 2000 && tieneMenu) {
-                emoji = "🐰🌟";
+                emoji = "🦊🌟";
                 mensaje = "¡Día perfecto completado! Estoy orgulloso. 🥳";
             } else if (tieneEntreno) {
-                emoji = "🐰💪";
+                emoji = "🦊💪";
                 mensaje = "¡Imparable con el ejercicio! Sigue así.";
             } else {
-                emoji = "🐰🥕";
+                emoji = "🦊🥕";
                 mensaje = "¡Vamos a cumplir las metas de hoy! 💪";
             }
         }
@@ -579,6 +856,85 @@
         if(paneId === 'despensa') renderizarDespensa();
         if(paneId === 'historial') renderizarHistorial();
         if(paneId === 'metas') actualizarUIAgua();
+        if(paneId === 'logros') renderizarLogros();
+    }
+
+    // --- Sistema de Nivel, XP y Logros ---
+
+    let statsExtra = JSON.parse(localStorage.getItem('nutri_stats')) || { recargas: 0, logrosVistos: [] };
+
+    function guardarStatsExtra() {
+        try { localStorage.setItem('nutri_stats', JSON.stringify(statsExtra)); } catch (e) { /* silencioso, no es crítico */ }
+    }
+
+    function calcularXP() {
+        let xp = 0;
+        Object.values(historialDias).forEach(dia => {
+            if (dia.desayuno) xp += 10;
+            if (dia.agua >= 2000) xp += 15;
+            if (dia.entrenamiento) xp += 10;
+            if (dia.desayuno && dia.agua >= 2000 && dia.entrenamiento) xp += 20; // bono día perfecto
+        });
+        xp += statsExtra.recargas * 5;
+        return xp;
+    }
+
+    function actualizarIndicadorNivel() {
+        const xp = calcularXP();
+        const xpPorNivel = 150;
+        const nivel = Math.floor(xp / xpPorNivel) + 1;
+        const xpEnNivel = xp % xpPorNivel;
+        const porcentaje = Math.min(100, (xpEnNivel / xpPorNivel) * 100);
+
+        document.getElementById('header-xp-pill').innerText = `Nv. ${nivel}`;
+        const badge = document.getElementById('xp-level-badge');
+        const bar = document.getElementById('xp-bar');
+        const texto = document.getElementById('xp-text');
+        if (badge) badge.innerText = `Nv. ${nivel}`;
+        if (bar) bar.style.width = porcentaje + '%';
+        if (texto) texto.innerText = `${xpEnNivel} / ${xpPorNivel} XP`;
+        return xp;
+    }
+
+    function obtenerDefinicionLogros() {
+        const dias = Object.values(historialDias);
+        const diasConMenu = dias.filter(d => d.desayuno).length;
+        const diasHidratados = dias.filter(d => d.agua >= 2000).length;
+        const diasEntreno = dias.filter(d => d.entrenamiento).length;
+        const diasPerfectos = dias.filter(d => d.desayuno && d.agua >= 2000 && d.entrenamiento).length;
+        const diasRegistrados = Object.keys(historialDias).length;
+
+        return [
+            { icon: '🥇', title: 'Primer paso', desc: 'Registra tu primera comida', unlocked: diasConMenu >= 1 },
+            { icon: '💧', title: 'Bien hidratado', desc: 'Cumple la meta de agua un día', unlocked: diasHidratados >= 1 },
+            { icon: '🏋️', title: 'En movimiento', desc: 'Registra 3 entrenamientos', unlocked: diasEntreno >= 3 },
+            { icon: '🌟', title: 'Día perfecto', desc: 'Comida + agua + entreno el mismo día', unlocked: diasPerfectos >= 1 },
+            { icon: '🔥', title: 'Constancia', desc: 'Registra menús 5 días distintos', unlocked: diasConMenu >= 5 },
+            { icon: '🛒', title: 'Buen abastecedor', desc: 'Recarga la despensa una vez', unlocked: statsExtra.recargas >= 1 },
+            { icon: '📅', title: 'Una semana activa', desc: 'Ten actividad en 7 días distintos', unlocked: diasRegistrados >= 7 },
+            { icon: '👑', title: 'Leyenda NutriGenesis', desc: 'Acumula 5 días perfectos', unlocked: diasPerfectos >= 5 }
+        ];
+    }
+
+    function renderizarLogros() {
+        actualizarIndicadorNivel();
+        const logros = obtenerDefinicionLogros();
+        const contenedor = document.getElementById('grid-logros');
+        contenedor.innerHTML = logros.map(l => `
+            <div class="logro-item ${l.unlocked ? 'unlocked' : 'locked'}">
+                <span class="logro-icon">${l.unlocked ? l.icon : '🔒'}</span>
+                <span class="logro-title">${l.title}</span>
+                <span class="logro-desc">${l.desc}</span>
+            </div>
+        `).join('');
+
+        // Avisar de insignias nuevas que el usuario aún no había visto
+        const nuevas = logros.filter(l => l.unlocked && !statsExtra.logrosVistos.includes(l.title));
+        if (nuevas.length > 0) {
+            statsExtra.logrosVistos = logros.filter(l => l.unlocked).map(l => l.title);
+            guardarStatsExtra();
+            mostrarToast(`🏆 ¡Insignia desbloqueada: ${nuevas[0].title}!`, 3200);
+        }
     }
 
     const opcionesMinuta = {
@@ -668,8 +1024,9 @@
             historialDias[fechaHoy].agua = aguaActual;
             actualizarUIAgua();
             actualizarMascotaSegunEstado('agua');
+            actualizarIndicadorNivel();
         } else {
-            alert('¡Meta de agua cumplida por hoy!');
+            mostrarToast('💧 ¡Meta de agua cumplida por hoy!');
         }
     }
 
@@ -678,7 +1035,7 @@
         asegurarRegistroHoy(fechaHoy);
 
         if (historialDias[fechaHoy].desayuno) {
-            alert("⚠️ Ya registraste un menú para hoy. Si deseas cambiarlo, elimina el registro actual en la pestaña Historial.");
+            mostrarToast('⚠️ Ya registraste un menú para hoy. Elimínalo en Historial si quieres cambiarlo.', 3200, true);
             return;
         }
 
@@ -715,7 +1072,8 @@
 
         guardarDatosEnLocal();
         actualizarMascotaSegunEstado('comida');
-        alert(`✅ ¡Consumo registrado! Total de hoy: ${totalCal} kcal descontadas de la despensa.`);
+        actualizarIndicadorNivel();
+        mostrarToast(`✅ Consumo registrado: ${totalCal} kcal descontadas de la despensa.`);
         generarNuevaMinuta();
     }
 
@@ -724,16 +1082,26 @@
         asegurarRegistroHoy(fechaHoy);
 
         const tipo = document.getElementById('tipo-ejercicio').value;
-        const minutos = document.getElementById('minutos-ejercicio').value;
+        const inputMinutos = document.getElementById('minutos-ejercicio');
+        let minutos = Number(inputMinutos.value);
+
+        if (isNaN(minutos) || inputMinutos.value.trim() === '') {
+            mostrarToast('⚠️ Ingresa una duración válida en minutos.', 2800, true);
+            return;
+        }
+        minutos = Math.min(300, Math.max(5, Math.round(minutos)));
+        inputMinutos.value = minutos;
 
         historialDias[fechaHoy].entrenamiento = `${tipo} - ${minutos} minutos`;
         guardarDatosEnLocal();
         document.getElementById('ejercicio-msg').innerText = `🎉 ¡${tipo} de ${minutos} min guardado!`;
         actualizarMascotaSegunEstado('entreno');
+        actualizarIndicadorNivel();
     }
 
-    function eliminarRegistroDia(fecha) {
-        if(confirm(`¿Estás seguro de eliminar el registro del día ${fecha}? Si tenías alimentos guardados, se devolverán al stock.`)) {
+    async function eliminarRegistroDia(fecha) {
+        const confirmado = await mostrarConfirm(`¿Eliminar el registro del día ${fecha}? Si tenías alimentos guardados, se devolverán al stock.`);
+        if (confirmado) {
             let datos = historialDias[fecha];
             
             if (datos && datos.partesMenu) {
@@ -763,29 +1131,35 @@
             renderizarHistorial();
             actualizarUIAgua();
             actualizarMascotaSegunEstado('idle');
-            alert("🗑️ Registro eliminado y stock devuelto correctamente.");
+            actualizarIndicadorNivel();
+            mostrarToast('🗑️ Registro eliminado y stock devuelto correctamente.');
         }
     }
 
-    function editarStock(key) {
+    async function editarStock(key) {
         let item = despensa[key];
-        let nuevoValor = prompt(`Ingrese la nueva cantidad para ${item.nombre} (en ${item.unidad}):`, item.stock);
-        if (nuevoValor !== null && !isNaN(nuevoValor) && nuevoValor.trim() !== "") {
-            item.stock = Number(nuevoValor);
+        let nuevoValor = await mostrarPromptStock(item.nombre, item.stock, item.unidad);
+        if (nuevoValor !== null) {
+            item.stock = nuevoValor;
             guardarDatosEnLocal();
             renderizarDespensa();
+            mostrarToast(`📦 ${item.nombre}: stock actualizado a ${nuevoValor} ${item.unidad}.`);
         }
     }
 
-    function recargarQuincenaCompleta() {
-        if(confirm("¿Deseas reponer toda la despensa con tus cantidades quincenales máximas?")) {
+    async function recargarQuincenaCompleta() {
+        const confirmado = await mostrarConfirm('¿Deseas reponer toda la despensa con tus cantidades quincenales máximas?');
+        if (confirmado) {
             for (let key in despensa) {
                 despensa[key].stock = despensa[key].max;
             }
+            statsExtra.recargas += 1;
+            guardarStatsExtra();
             guardarDatosEnLocal();
             renderizarDespensa();
+            actualizarIndicadorNivel();
             document.getElementById('pet-text').innerText = "¡Despensa al 100%! 🛒";
-            alert("🛒 ¡Despensa recargada al 100% para la nueva quincena!");
+            mostrarToast('🛒 ¡Despensa recargada al 100% para la nueva quincena!');
         }
     }
 
@@ -818,14 +1192,15 @@
         if (filtroVal === 'todos') return dias;
 
         let diasLimite = parseInt(filtroVal);
-        let ahora = new Date();
-        
+        let hoy = new Date();
+        let hoyMedianoche = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+
         return dias.filter(fechaStr => {
             let partes = fechaStr.split('-');
             if(partes.length !== 3) return true;
             let dRegistro = new Date(partes[0], partes[1] - 1, partes[2]);
-            let diferenciaDias = (ahora - dRegistro) / (1000 * 60 * 60 * 24);
-            return diferenciaDias <= diasLimite;
+            let diferenciaDias = (hoyMedianoche - dRegistro) / (1000 * 60 * 60 * 24);
+            return diferenciaDias >= 0 && diferenciaDias < diasLimite;
         });
     }
 
@@ -868,7 +1243,7 @@
     function abrirReporteNutri() {
         const fechasFiltradas = filtrarFechas();
         if(fechasFiltradas.length === 0) {
-            alert("No hay registros en el periodo seleccionado para generar el reporte.");
+            mostrarToast('No hay registros en el periodo seleccionado para generar el reporte.', 3000, true);
             return;
         }
 
@@ -909,7 +1284,7 @@
     function enviarReporteCompartir() {
         const fechasFiltradas = filtrarFechas();
         if(fechasFiltradas.length === 0) {
-            alert("No hay registros en el periodo seleccionado para enviar.");
+            mostrarToast('No hay registros en el periodo seleccionado para enviar.', 3000, true);
             return;
         }
 
@@ -940,7 +1315,9 @@
             }).catch((error) => console.log('Error al compartir', error));
         } else {
             navigator.clipboard.writeText(textoReporte).then(() => {
-                alert("📋 ¡Reporte copiado al portapapeles! Ya puedes pegarlo en WhatsApp o correo.");
+                mostrarToast('📋 ¡Reporte copiado! Ya puedes pegarlo en WhatsApp o correo.');
+            }).catch(() => {
+                mostrarToast('⚠️ No se pudo copiar automáticamente. Copia el texto manualmente.', 3200, true);
             });
         }
     }
@@ -949,6 +1326,7 @@
         generarNuevaMinuta();
         actualizarUIAgua();
         actualizarMascotaSegunEstado('idle');
+        actualizarIndicadorNivel();
     };
 </script>
 
