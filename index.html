@@ -207,7 +207,23 @@
         }
         .btn-edit:hover { background: var(--accent); }
 
-        /* Historial */
+        /* Historial y Filtros Reporte */
+        .filter-box {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+        .filter-box select {
+            flex: 1;
+            background: #1f2937;
+            border: 1px solid #374151;
+            color: white;
+            padding: 6px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+        }
+
         .history-item {
             background: #1f2937;
             border-left: 4px solid var(--primary);
@@ -219,16 +235,8 @@
         }
         .history-item .date { font-weight: bold; color: var(--primary); margin-bottom: 4px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
         .history-details { margin-top: 6px; color: #d1d5db; line-height: 1.3; }
-        .history-training {
-            margin-top: 4px;
-            color: #38bdf8;
-            font-weight: bold;
-        }
-        .history-water {
-            margin-top: 4px;
-            color: #60a5fa;
-            font-weight: bold;
-        }
+        .history-training { margin-top: 4px; color: #38bdf8; font-weight: bold; }
+        .history-water { margin-top: 4px; color: #60a5fa; font-weight: bold; }
         .btn-delete-history {
             background: rgba(239, 68, 68, 0.2);
             color: #fca5a5;
@@ -244,15 +252,8 @@
         .btn-delete-history:hover { background: var(--danger); color: white; }
 
         /* Formularios entrenamiento y metas */
-        .form-group {
-            margin-bottom: 10px;
-        }
-        .form-group label {
-            display: block;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-        }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
         .form-control {
             width: 100%;
             background: #1f2937;
@@ -326,7 +327,6 @@
             <h1>⚡ NutriGenesis</h1>
             <p>Control & Hábitos</p>
         </div>
-        <!-- Mascota Dinámica -->
         <div class="pet-container" onclick="interactuarMascota()" title="¡Tócame para hablar!">
             <div class="pet-avatar idle" id="pet-emoji">🐰</div>
             <div class="pet-speech" id="pet-text">¡Hola! ¿Qué comemos hoy?</div>
@@ -357,7 +357,7 @@
             </div>
         </div>
 
-        <!-- DESPENSA EDITABLE Y RECARGABLE -->
+        <!-- DESPENSA -->
         <div id="despensa" class="tab-pane">
             <div class="card">
                 <h3>
@@ -377,10 +377,23 @@
             </div>
         </div>
 
-        <!-- HISTORIAL -->
+        <!-- HISTORIAL & REPORTE NUTRI -->
         <div id="historial" class="tab-pane">
             <div class="card">
-                <h3>📅 Registro Diario</h3>
+                <h3>📅 Registro y Reporte</h3>
+                
+                <!-- Selector de Periodo -->
+                <div class="filter-box">
+                    <select id="filtro-periodo" onchange="renderizarHistorial()">
+                        <option value="todos">📜 Todo el historial</option>
+                        <option value="7">⚡ Últimos 7 días</option>
+                        <option value="15">📆 Últimos 15 días</option>
+                        <option value="30">🗓️ Último mes (30 días)</option>
+                    </select>
+                </div>
+                
+                <button class="btn-action" style="margin-bottom: 12px; background: var(--accent); color: white;" onclick="generarReporteNutri()">📄 Generar Reporte para Nutricionista</button>
+
                 <div id="contenedor-historial">
                     <p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; padding: 20px;">Aún no hay registros guardados.</p>
                 </div>
@@ -421,7 +434,7 @@
 </div>
 
 <script>
-    let despensa = {
+    let despensa = JSON.parse(localStorage.getItem('nutri_despensa')) || {
         pollo: { nombre: "Pechuga Pollo", stock: 1500, max: 1500, unidad: "g" },
         paleta: { nombre: "Posta Paleta", stock: 1000, max: 1000, unidad: "g" },
         atun: { nombre: "Atún Agua", stock: 6, max: 6, unidad: "latas" },
@@ -443,10 +456,26 @@
         frutas: { nombre: "Manzanas/Peras", stock: 6, max: 6, unidad: "unid" }
     };
 
-    let historialDias = {}; 
+    let historialDias = JSON.parse(localStorage.getItem('nutri_historial')) || {}; 
     let minutaActual = {};
 
-    // Sistema de personalidad interactiva de NutriBun
+    function guardarDatosEnLocal() {
+        localStorage.setItem('nutri_despensa', JSON.stringify(despensa));
+        localStorage.setItem('nutri_historial', JSON.stringify(historialDias));
+    }
+
+    function obtenerFechaHoyStr() {
+        return new Date().toLocaleDateString('es-CL', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    }
+
+    function obtenerFechaLegible(fechaStr) {
+        // Convierte YYYY-MM-DD a formato amigable
+        if(!fechaStr.includes('-')) return fechaStr;
+        let p = fechaStr.split('-');
+        let d = new Date(p[0], p[1] - 1, p[2]);
+        return d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'short' });
+    }
+
     function actualizarMascotaSegunEstado(tipoAccion = 'idle') {
         const emojiEl = document.getElementById('pet-emoji');
         const textEl = document.getElementById('pet-text');
@@ -479,7 +508,6 @@
             emoji = "🐰✨";
             mensaje = listaFrases[Math.floor(Math.random() * listaFrases.length)];
         } else {
-            // Estado por defecto según el día
             if (agua >= 2000 && tieneMenu) {
                 emoji = "🐰🌟";
                 mensaje = "¡Día perfecto completado! Estoy orgulloso. 🥳";
@@ -495,9 +523,8 @@
         emojiEl.innerText = emoji;
         textEl.innerText = mensaje;
 
-        // Efecto visual de salto
         emojiEl.classList.remove('happy');
-        void emojiEl.offsetWidth; // reiniciar animación
+        void emojiEl.offsetWidth; 
         emojiEl.classList.add('happy');
     }
 
@@ -576,10 +603,6 @@
         document.getElementById('contenedor-minuta').innerHTML = html;
     }
 
-    function obtenerFechaHoyStr() {
-        return new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'short' });
-    }
-
     function asegurarRegistroHoy(fecha) {
         if (!historialDias[fecha]) {
             historialDias[fecha] = { calorias: 0, menu: null, partesMenu: null, entrenamiento: null, agua: 0 };
@@ -593,6 +616,7 @@
         
         document.getElementById('agua-val').innerText = aguaActual;
         document.getElementById('agua-bar').style.width = (aguaActual / 2000) * 100 + '%';
+        guardarDatosEnLocal();
     }
 
     function sumarAgua() {
@@ -646,6 +670,7 @@
         historialDias[fechaHoy].menu = `Desayuno: ${minutaActual.desayuno.text} | Almuerzo: ${minutaActual.almuerzo.text} | Cena: ${minutaActual.cena.text}`;
         historialDias[fechaHoy].partesMenu = partes;
 
+        guardarDatosEnLocal();
         actualizarMascotaSegunEstado('comida');
         alert(`✅ ¡Consumo registrado! Total de hoy: ${totalCal} kcal descontadas de la despensa.`);
         generarNuevaMinuta();
@@ -659,6 +684,7 @@
         const minutos = document.getElementById('minutos-ejercicio').value;
 
         historialDias[fechaHoy].entrenamiento = `${tipo} - ${minutos} minutos`;
+        guardarDatosEnLocal();
         document.getElementById('ejercicio-msg').innerText = `🎉 ¡${tipo} de ${minutos} min guardado!`;
         actualizarMascotaSegunEstado('entreno');
     }
@@ -690,6 +716,7 @@
             }
 
             delete historialDias[fecha];
+            guardarDatosEnLocal();
             renderizarHistorial();
             actualizarUIAgua();
             actualizarMascotaSegunEstado('idle');
@@ -702,6 +729,7 @@
         let nuevoValor = prompt(`Ingrese la nueva cantidad para ${item.nombre} (en ${item.unidad}):`, item.stock);
         if (nuevoValor !== null && !isNaN(nuevoValor) && nuevoValor.trim() !== "") {
             item.stock = Number(nuevoValor);
+            guardarDatosEnLocal();
             renderizarDespensa();
         }
     }
@@ -711,6 +739,7 @@
             for (let key in despensa) {
                 despensa[key].stock = despensa[key].max;
             }
+            guardarDatosEnLocal();
             renderizarDespensa();
             document.getElementById('pet-text').innerText = "¡Despensa al 100%! 🛒";
             alert("🛒 ¡Despensa recargada al 100% para la nueva quincena!");
@@ -740,21 +769,41 @@
         `;
     }
 
+    function filtrarFechas() {
+        let dias = Object.keys(historialDias).sort().reverse();
+        let filtroVal = document.getElementById('filtro-periodo').value;
+        
+        if (filtroVal === 'todos') return dias;
+
+        let diasLimite = parseInt(filtroVal);
+        let ahora = new Date();
+        
+        return dias.filter(fechaStr => {
+            // fechaStr formato YYYY-MM-DD
+            let partes = fechaStr.split('-');
+            if(partes.length !== 3) return true;
+            let dRegistro = new Date(partes[0], partes[1] - 1, partes[2]);
+            let diferenciaDias = (ahora - dRegistro) / (1000 * 60 * 60 * 24);
+            return diferenciaDias <= diasLimite;
+        });
+    }
+
     function renderizarHistorial() {
         const contenedor = document.getElementById('contenedor-historial');
-        const fechas = Object.keys(historialDias);
+        const fechasFiltradas = filtrarFechas();
 
-        if(fechas.length === 0) {
-            contenedor.innerHTML = `<p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; padding: 20px;">Aún no hay registros guardados.</p>`;
+        if(fechasFiltradas.length === 0) {
+            contenedor.innerHTML = `<p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; padding: 20px;">No hay registros en el periodo seleccionado.</p>`;
             return;
         }
 
-        contenedor.innerHTML = fechas.map(fecha => {
+        contenedor.innerHTML = fechasFiltradas.map(fecha => {
             let datos = historialDias[fecha];
+            let fechaBonita = obtenerFechaLegible(fecha);
             return `
                 <div class="history-item">
                     <span class="date">
-                        <span>📅 ${fecha}</span>
+                        <span>📅 ${fechaBonita}</span>
                         ${datos.calorias > 0 ? `<span style="color:#34d399;">🔥 ${datos.calorias} kcal</span>` : ''}
                     </span>
                     ${datos.menu ? `<div class="history-details">${datos.menu}</div>` : ''}
@@ -766,6 +815,66 @@
                 </div>
             `;
         }).join('');
+    }
+
+    function generarReporteNutri() {
+        const fechasFiltradas = filtrarFechas();
+        if(fechasFiltradas.length === 0) {
+            alert("No hay registros en el periodo seleccionado para generar el reporte.");
+            return;
+        }
+
+        let filtroTxt = document.getElementById('filtro-periodo').selectedOptions[0].text;
+
+        let ventanaReporte = window.open('', '_blank');
+        let htmlReporte = `
+            <html>
+            <head>
+                <title>Reporte Nutricional - NutriGenesis</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 30px; color: #111; max-width: 700px; margin: auto; }
+                    h2 { color: #059669; border-bottom: 2px solid #10b981; padding-bottom: 5px; }
+                    .info-paciente { background: #f3f4f6; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; }
+                    .dia-card { border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #fff; page-break-inside: avoid; }
+                    .dia-header { font-weight: bold; color: #047857; margin-bottom: 6px; font-size: 1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; display: flex; justify-content: space-between; }
+                    .detalle { font-size: 0.85rem; margin: 4px 0; color: #374151; }
+                    .btn-imprimir { background: #10b981; color: white; border: none; padding: 10px 20px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-bottom: 20px; display: block; width: 100%; text-align: center; }
+                    @media print { .btn-imprimir { display: none; } }
+                </style>
+            </head>
+            <body>
+                <button class="btn-imprimir" onclick="window.print()">🖨️ Imprimir o Guardar como PDF</button>
+                <h2>📋 Reporte Nutricional y de Hábitos</h2>
+                <div class="info-paciente">
+                    <p><strong>Paciente:</strong> Genesis Cortez</p>
+                    <p><strong>Periodo del reporte:</strong> ${filtroTxt}</p>
+                    <p><strong>Fecha de emisión:</strong> ${new Date().toLocaleDateString('es-CL')}</p>
+                </div>
+        `;
+
+        fechasFiltradas.forEach(fecha => {
+            let datos = historialDias[fecha];
+            let fechaBonita = obtenerFechaLegible(fecha);
+            htmlReporte += `
+                <div class="dia-card">
+                    <div class="dia-header">
+                        <span>📅 ${fechaBonita}</span>
+                        <span>🔥 ${datos.calorias || 0} kcal</span>
+                    </div>
+                    <div class="detalle"><strong>🍽️ Menú consumido:</strong> ${datos.menu || 'Sin registro de menú'}</div>
+                    <div class="detalle"><strong>💪 Entrenamiento:</strong> ${datos.entrenamiento || 'Sin registro'}</div>
+                    <div class="detalle"><strong>💧 Agua consumida:</strong> ${datos.agua || 0} ml</div>
+                </div>
+            `;
+        });
+
+        htmlReporte += `
+            </body>
+            </html>
+        `;
+
+        ventanaReporte.document.write(htmlReporte);
+        ventanaReporte.document.close();
     }
 
     window.onload = function() {
