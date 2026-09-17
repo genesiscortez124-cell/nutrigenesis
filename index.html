@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NutriGenesis Pro - Reporte Móvil</title>
+    <title>NutriGenesis Pro - Historial Detallado</title>
     <style>
         :root {
             --bg-dark: #0f172a;
@@ -226,9 +226,9 @@
             font-size: 0.78rem;
             position: relative;
         }
-        .history-item .date { font-weight: bold; color: var(--primary); margin-bottom: 4px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
-        .history-details { margin-top: 6px; color: #d1d5db; line-height: 1.3; }
-        .history-training { margin-top: 4px; color: #38bdf8; font-weight: bold; }
+        .history-item .date { font-weight: bold; color: var(--primary); margin-bottom: 6px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
+        .history-meal-line { margin-top: 4px; color: #d1d5db; line-height: 1.3; font-size: 0.75rem; }
+        .history-training { margin-top: 6px; color: #38bdf8; font-weight: bold; }
         .history-water { margin-top: 4px; color: #60a5fa; font-weight: bold; }
         .btn-delete-history {
             background: rgba(239, 68, 68, 0.2);
@@ -525,7 +525,7 @@
 
         const fechaHoy = obtenerFechaHoyStr();
         const agua = historialDias[fechaHoy]?.agua || 0;
-        const tieneMenu = historialDias[fechaHoy]?.menu;
+        const tieneMenu = historialDias[fechaHoy]?.desayuno;
         const tieneEntreno = historialDias[fechaHoy]?.entrenamiento;
 
         if (tipoAccion === 'agua') {
@@ -644,7 +644,7 @@
 
     function asegurarRegistroHoy(fecha) {
         if (!historialDias[fecha]) {
-            historialDias[fecha] = { calorias: 0, menu: null, partesMenu: null, entrenamiento: null, agua: 0 };
+            historialDias[fecha] = { calorias: 0, desayuno: null, colacion1: null, almuerzo: null, colacion2: null, cena: null, partesMenu: null, entrenamiento: null, agua: 0 };
         }
     }
 
@@ -677,7 +677,7 @@
         const fechaHoy = obtenerFechaHoyStr();
         asegurarRegistroHoy(fechaHoy);
 
-        if (historialDias[fechaHoy].menu) {
+        if (historialDias[fechaHoy].desayuno) {
             alert("⚠️ Ya registraste un menú para hoy. Si deseas cambiarlo, elimina el registro actual en la pestaña Historial.");
             return;
         }
@@ -706,7 +706,11 @@
         });
 
         historialDias[fechaHoy].calorias = totalCal;
-        historialDias[fechaHoy].menu = `Desayuno: ${minutaActual.desayuno.text} | Almuerzo: ${minutaActual.almuerzo.text} | Cena: ${minutaActual.cena.text}`;
+        historialDias[fechaHoy].desayuno = minutaActual.desayuno.text;
+        historialDias[fechaHoy].colacion1 = minutaActual.colacion1.text;
+        historialDias[fechaHoy].almuerzo = minutaActual.almuerzo.text;
+        historialDias[fechaHoy].colacion2 = minutaActual.colacion2.text;
+        historialDias[fechaHoy].cena = minutaActual.cena.text;
         historialDias[fechaHoy].partesMenu = partes;
 
         guardarDatosEnLocal();
@@ -843,7 +847,14 @@
                         <span>📅 ${fechaBonita}</span>
                         ${datos.calorias > 0 ? `<span style="color:#34d399;">🔥 ${datos.calorias} kcal</span>` : ''}
                     </span>
-                    ${datos.menu ? `<div class="history-details">${datos.menu}</div>` : ''}
+                    ${datos.desayuno ? `
+                        <div class="history-meal-line"><strong>🌅 Desayuno:</strong> ${datos.desayuno}</div>
+                        <div class="history-meal-line"><strong>🍎 Colación 1:</strong> ${datos.colacion1}</div>
+                        <div class="history-meal-line"><strong>🍽️ Almuerzo:</strong> ${datos.almuerzo}</div>
+                        <div class="history-meal-line"><strong>☕ Colación 2:</strong> ${datos.colacion2}</div>
+                        <div class="history-meal-line"><strong>🌙 Cena:</strong> ${datos.cena}</div>
+                    ` : '<div class="history-meal-line" style="color:var(--text-muted);">Sin registro de menú</div>'}
+                    
                     ${datos.entrenamiento ? `<div class="history-training">💪 ${datos.entrenamiento}</div>` : ''}
                     ${datos.agua > 0 ? `<div class="history-water">💧 Agua: ${datos.agua} ml</div>` : ''}
                     <div class="clearfix">
@@ -870,13 +881,19 @@
             let fechaBonita = obtenerFechaLegible(fecha);
             htmlCard += `
                 <div class="reporte-contenido-caja">
-                    <div style="font-weight: bold; color: var(--primary); margin-bottom: 4px; display:flex; justify-content:space-between;">
+                    <div style="font-weight: bold; color: var(--primary); margin-bottom: 6px; display:flex; justify-content:space-between;">
                         <span>📅 ${fechaBonita}</span>
                         <span>🔥 ${datos.calorias || 0} kcal</span>
                     </div>
-                    <div style="color: #d1d5db; margin-top:2px;"><strong>🍽️ Menú:</strong> ${datos.menu || 'Sin registro'}</div>
-                    <div style="color: #38bdf8; margin-top:2px;"><strong>💪 Entrenamiento:</strong> ${datos.entrenamiento || 'Sin registro'}</div>
-                    <div style="color: #60a5fa; margin-top:2px;"><strong>💧 Agua:</strong> ${datos.agua || 0} ml</div>
+                    ${datos.desayuno ? `
+                        <div style="color: #d1d5db; margin-top:2px; font-size:0.75rem;"><strong>🌅 Desayuno:</strong> ${datos.desayuno}</div>
+                        <div style="color: #d1d5db; margin-top:2px; font-size:0.75rem;"><strong>🍎 Colación 1:</strong> ${datos.colacion1}</div>
+                        <div style="color: #d1d5db; margin-top:2px; font-size:0.75rem;"><strong>🍽️ Almuerzo:</strong> ${datos.almuerzo}</div>
+                        <div style="color: #d1d5db; margin-top:2px; font-size:0.75rem;"><strong>☕ Colación 2:</strong> ${datos.colacion2}</div>
+                        <div style="color: #d1d5db; margin-top:2px; font-size:0.75rem;"><strong>🌙 Cena:</strong> ${datos.cena}</div>
+                    ` : '<div style="color:var(--text-muted); font-size:0.75rem;">Sin registro de menú</div>'}
+                    <div style="color: #38bdf8; margin-top:4px; font-size:0.75rem;"><strong>💪 Entrenamiento:</strong> ${datos.entrenamiento || 'Sin registro'}</div>
+                    <div style="color: #60a5fa; margin-top:2px; font-size:0.75rem;"><strong>💧 Agua:</strong> ${datos.agua || 0} ml</div>
                 </div>
             `;
         });
@@ -903,19 +920,25 @@
             let datos = historialDias[fecha];
             let fechaBonita = obtenerFechaLegible(fecha);
             textoReporte += `📅 *${fechaBonita}* (🔥 ${datos.calorias || 0} kcal)\n`;
-            textoReporte += `🍽️ ${datos.menu || 'Sin menú'}\n`;
+            if(datos.desayuno) {
+                textoReporte += `• 🌅 Desayuno: ${datos.desayuno}\n`;
+                textoReporte += `• 🍎 Colación 1: ${datos.colacion1}\n`;
+                textoReporte += `• 🍽️ Almuerzo: ${datos.almuerzo}\n`;
+                textoReporte += `• ☕ Colación 2: ${datos.colacion2}\n`;
+                textoReporte += `• 🌙 Cena: ${datos.cena}\n`;
+            } else {
+                textoReporte += `• Sin registro de menú\n`;
+            }
             textoReporte += `💪 ${datos.entrenamiento || 'Sin entrenamiento'}\n`;
             textoReporte += `💧 Agua: ${datos.agua || 0} ml\n\n`;
         });
 
-        // Usar la API nativa de compartir del celular (compatible con WhatsApp, Gmail, etc.)
         if (navigator.share) {
             navigator.share({
                 title: 'Reporte Nutricional - NutriGenesis',
                 text: textoReporte,
             }).catch((error) => console.log('Error al compartir', error));
         } else {
-            // Si el navegador no soporta share nativo, copiar al portapapeles
             navigator.clipboard.writeText(textoReporte).then(() => {
                 alert("📋 ¡Reporte copiado al portapapeles! Ya puedes pegarlo en WhatsApp o correo.");
             });
