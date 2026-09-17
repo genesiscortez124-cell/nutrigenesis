@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NutriGenesis Pro - Mascota Interactiva</title>
+    <title>NutriGenesis Pro - Reporte Seguro</title>
     <style>
         :root {
             --bg-dark: #0f172a;
@@ -37,6 +37,7 @@
             flex-direction: column;
             height: 94vh;
             border: 4px solid #334155;
+            position: relative;
         }
         .app-header {
             background: linear-gradient(135deg, #059669, #10b981);
@@ -69,17 +70,9 @@
         .pet-container:hover { background: rgba(255, 255, 255, 0.25); }
         .pet-container:active { transform: scale(0.90); }
         
-        .pet-avatar {
-            font-size: 1.6rem;
-            transition: transform 0.3s;
-        }
+        .pet-avatar { font-size: 1.6rem; transition: transform 0.3s; }
         .pet-avatar.happy { animation: jump 0.5s ease; }
-        .pet-avatar.idle { animation: floatPet 2s infinite ease-in-out; }
 
-        @keyframes floatPet {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
         @keyframes jump {
             0% { transform: translateY(0) scale(1); }
             50% { transform: translateY(-10px) scale(1.2); }
@@ -207,7 +200,7 @@
         }
         .btn-edit:hover { background: var(--accent); }
 
-        /* Historial y Filtros Reporte */
+        /* Filtros Reporte */
         .filter-box {
             display: flex;
             gap: 6px;
@@ -250,6 +243,44 @@
             float: right;
         }
         .btn-delete-history:hover { background: var(--danger); color: white; }
+
+        /* Modal de Reporte Interno */
+        #modal-reporte {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--card-dark);
+            z-index: 100;
+            padding: 16px;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+        .modal-header h2 { font-size: 1rem; color: var(--primary); }
+        .btn-close-modal {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        .reporte-contenido-caja {
+            background: #111827;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            margin-bottom: 12px;
+            border: 1px solid #374151;
+        }
 
         /* Formularios entrenamiento y metas */
         .form-group { margin-bottom: 10px; }
@@ -328,7 +359,7 @@
             <p>Control & Hábitos</p>
         </div>
         <div class="pet-container" onclick="interactuarMascota()" title="¡Tócame para hablar!">
-            <div class="pet-avatar idle" id="pet-emoji">🐰</div>
+            <div class="pet-avatar" id="pet-emoji">🐰</div>
             <div class="pet-speech" id="pet-text">¡Hola! ¿Qué comemos hoy?</div>
         </div>
     </div>
@@ -382,7 +413,6 @@
             <div class="card">
                 <h3>📅 Registro y Reporte</h3>
                 
-                <!-- Selector de Periodo -->
                 <div class="filter-box">
                     <select id="filtro-periodo" onchange="renderizarHistorial()">
                         <option value="todos">📜 Todo el historial</option>
@@ -392,7 +422,7 @@
                     </select>
                 </div>
                 
-                <button class="btn-action" style="margin-bottom: 12px; background: var(--accent); color: white;" onclick="generarReporteNutri()">📄 Generar Reporte para Nutricionista</button>
+                <button class="btn-action" style="margin-bottom: 12px; background: var(--accent); color: white;" onclick="abrirReporteNutri()">📄 Ver Reporte para Nutricionista</button>
 
                 <div id="contenedor-historial">
                     <p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; padding: 20px;">Aún no hay registros guardados.</p>
@@ -430,6 +460,16 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- PANTALLA MODAL DE REPORTE INTERNO -->
+    <div id="modal-reporte">
+        <div class="modal-header">
+            <h2>📋 Reporte Nutricional</h2>
+            <button class="btn-close-modal" onclick="cerrarReporteNutri()">✕ Cerrar</button>
+        </div>
+        <p style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 10px;">Paciente: Genesis Cortez | <span id="reporte-periodo-lbl"></span></p>
+        <div id="cuerpo-reporte-modal"></div>
     </div>
 </div>
 
@@ -469,7 +509,6 @@
     }
 
     function obtenerFechaLegible(fechaStr) {
-        // Convierte YYYY-MM-DD a formato amigable
         if(!fechaStr.includes('-')) return fechaStr;
         let p = fechaStr.split('-');
         let d = new Date(p[0], p[1] - 1, p[2]);
@@ -522,7 +561,6 @@
 
         emojiEl.innerText = emoji;
         textEl.innerText = mensaje;
-
         emojiEl.classList.remove('happy');
         void emojiEl.offsetWidth; 
         emojiEl.classList.add('happy');
@@ -772,14 +810,12 @@
     function filtrarFechas() {
         let dias = Object.keys(historialDias).sort().reverse();
         let filtroVal = document.getElementById('filtro-periodo').value;
-        
         if (filtroVal === 'todos') return dias;
 
         let diasLimite = parseInt(filtroVal);
         let ahora = new Date();
         
         return dias.filter(fechaStr => {
-            // fechaStr formato YYYY-MM-DD
             let partes = fechaStr.split('-');
             if(partes.length !== 3) return true;
             let dRegistro = new Date(partes[0], partes[1] - 1, partes[2]);
@@ -817,7 +853,7 @@
         }).join('');
     }
 
-    function generarReporteNutri() {
+    function abrirReporteNutri() {
         const fechasFiltradas = filtrarFechas();
         if(fechasFiltradas.length === 0) {
             alert("No hay registros en el periodo seleccionado para generar el reporte.");
@@ -825,56 +861,31 @@
         }
 
         let filtroTxt = document.getElementById('filtro-periodo').selectedOptions[0].text;
+        document.getElementById('reporte-periodo-lbl').innerText = filtroTxt;
 
-        let ventanaReporte = window.open('', '_blank');
-        let htmlReporte = `
-            <html>
-            <head>
-                <title>Reporte Nutricional - NutriGenesis</title>
-                <style>
-                    body { font-family: Arial, sans-serif; padding: 30px; color: #111; max-width: 700px; margin: auto; }
-                    h2 { color: #059669; border-bottom: 2px solid #10b981; padding-bottom: 5px; }
-                    .info-paciente { background: #f3f4f6; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; }
-                    .dia-card { border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #fff; page-break-inside: avoid; }
-                    .dia-header { font-weight: bold; color: #047857; margin-bottom: 6px; font-size: 1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; display: flex; justify-content: space-between; }
-                    .detalle { font-size: 0.85rem; margin: 4px 0; color: #374151; }
-                    .btn-imprimir { background: #10b981; color: white; border: none; padding: 10px 20px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-bottom: 20px; display: block; width: 100%; text-align: center; }
-                    @media print { .btn-imprimir { display: none; } }
-                </style>
-            </head>
-            <body>
-                <button class="btn-imprimir" onclick="window.print()">🖨️ Imprimir o Guardar como PDF</button>
-                <h2>📋 Reporte Nutricional y de Hábitos</h2>
-                <div class="info-paciente">
-                    <p><strong>Paciente:</strong> Genesis Cortez</p>
-                    <p><strong>Periodo del reporte:</strong> ${filtroTxt}</p>
-                    <p><strong>Fecha de emisión:</strong> ${new Date().toLocaleDateString('es-CL')}</p>
-                </div>
-        `;
-
+        let htmlCard = '';
         fechasFiltradas.forEach(fecha => {
             let datos = historialDias[fecha];
             let fechaBonita = obtenerFechaLegible(fecha);
-            htmlReporte += `
-                <div class="dia-card">
-                    <div class="dia-header">
+            htmlCard += `
+                <div class="reporte-contenido-caja">
+                    <div style="font-weight: bold; color: var(--primary); margin-bottom: 4px; display:flex; justify-content:space-between;">
                         <span>📅 ${fechaBonita}</span>
                         <span>🔥 ${datos.calorias || 0} kcal</span>
                     </div>
-                    <div class="detalle"><strong>🍽️ Menú consumido:</strong> ${datos.menu || 'Sin registro de menú'}</div>
-                    <div class="detalle"><strong>💪 Entrenamiento:</strong> ${datos.entrenamiento || 'Sin registro'}</div>
-                    <div class="detalle"><strong>💧 Agua consumida:</strong> ${datos.agua || 0} ml</div>
+                    <div style="color: #d1d5db; margin-top:2px;"><strong>🍽️ Menú:</strong> ${datos.menu || 'Sin registro'}</div>
+                    <div style="color: #38bdf8; margin-top:2px;"><strong>💪 Entrenamiento:</strong> ${datos.entrenamiento || 'Sin registro'}</div>
+                    <div style="color: #60a5fa; margin-top:2px;"><strong>💧 Agua:</strong> ${datos.agua || 0} ml</div>
                 </div>
             `;
         });
 
-        htmlReporte += `
-            </body>
-            </html>
-        `;
+        document.getElementById('cuerpo-reporte-modal').innerHTML = htmlCard;
+        document.getElementById('modal-reporte').style.display = 'block';
+    }
 
-        ventanaReporte.document.write(htmlReporte);
-        ventanaReporte.document.close();
+    function cerrarReporteNutri() {
+        document.getElementById('modal-reporte').style.display = 'none';
     }
 
     window.onload = function() {
