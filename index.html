@@ -443,6 +443,10 @@
             cursor: pointer;
             font-weight: bold;
         }
+        .btn-small.danger {
+            background: linear-gradient(135deg, var(--danger), #8f2a2e);
+        }
+        .header-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 
         .progress-container {
             background: var(--bg-darker);
@@ -651,9 +655,13 @@
             <div class="card">
                 <h3>
                     <span>📦 Inventario Quincenal</span>
-                    <button class="btn-small" onclick="recargarQuincenaCompleta()">🛒 Recargar Todo</button>
+                    <span class="header-actions">
+                        <button class="btn-small" onclick="recargarQuincenaCompleta()">🛒 Recargar Todo</button>
+                        <button class="btn-small danger" onclick="restablecerDespensaPorDefecto()">♻️ Restablecer</button>
+                    </span>
                 </h3>
                 <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 8px;">Edita stock o haz recarga completa quincenal:</p>
+                <p style="font-size: 0.68rem; color: var(--text-muted); margin: -4px 0 8px;">♻️ <strong>Restablecer</strong> devuelve la despensa a la lista original de productos y cantidades: se eliminan los productos que hayas agregado y se pierden los cambios de stock, ración y calorías. Tu historial y tus logros no se tocan.</p>
                 
                 <p style="font-size: 0.75rem; color: var(--primary); font-weight: bold; margin: 6px 0;">🥩 Proteínas & Lácteos</p>
                 <div class="pantry-grid" id="grid-proteinas"></div>
@@ -859,7 +867,8 @@
         { id: 'otros', label: '🧺 Otros productos' }
     ];
 
-    let despensa = JSON.parse(localStorage.getItem('nutri_despensa')) || {
+    // Despensa de fábrica: se usa al abrir la app por primera vez y al pulsar "Restablecer"
+    const DESPENSA_POR_DEFECTO = {
         k1_pechuga_de_pollo: { nombre: "Pechuga de pollo", stock: 850, max: 850, unidad: "gr", categoria: "proteinas", racion: 150, calorias: 248 },
         k2_avena: { nombre: "Avena", stock: 550, max: 550, unidad: "gr", categoria: "cereales", racion: 50, calorias: 190 },
         k3_palta_hass: { nombre: "Palta hass", stock: 5, max: 5, unidad: "unid", categoria: "frescos", racion: 0.5, calorias: 120 },
@@ -887,6 +896,13 @@
         k25_fideos: { nombre: "Fideos", stock: 2, max: 2, unidad: "kilos", categoria: "cereales", racion: 0.1, calorias: 150 },
         k26_arroz: { nombre: "Arroz", stock: 2, max: 2, unidad: "kilos", categoria: "cereales", racion: 0.1, calorias: 130 }
     };
+
+    // Copia profunda para que editar el stock nunca modifique la plantilla original
+    function clonarDespensaPorDefecto() {
+        return JSON.parse(JSON.stringify(DESPENSA_POR_DEFECTO));
+    }
+
+    let despensa = JSON.parse(localStorage.getItem('nutri_despensa')) || clonarDespensaPorDefecto();
 
     // A los ítems guardados antes de esta actualización les puede faltar "categoria"
     for (let k in despensa) {
@@ -1451,6 +1467,25 @@
             document.getElementById('pet-text').innerText = "¡Despensa al 100%! 🛒";
             mostrarToast('🛒 ¡Despensa recargada al 100% para la nueva quincena!');
         }
+    }
+
+    async function restablecerDespensaPorDefecto() {
+        const personalizados = Object.keys(despensa).filter(k => !(k in DESPENSA_POR_DEFECTO)).length;
+        const detalle = personalizados > 0
+            ? ` Se eliminarán ${personalizados} producto(s) que agregaste tú.`
+            : '';
+        const confirmado = await mostrarConfirm(
+            `¿Restablecer la despensa a los valores predeterminados?${detalle} Se perderán los cambios de stock, ración y calorías. Tu historial no se modifica.`
+        );
+        if (!confirmado) return;
+
+        despensa = clonarDespensaPorDefecto();
+        guardarDatosEnLocal();
+        renderizarDespensa();
+        generarNuevaMinuta();
+        actualizarIndicadorNivel();
+        document.getElementById('pet-text').innerText = "Despensa como el primer día ♻️";
+        mostrarToast('♻️ Despensa restablecida a los valores predeterminados.');
     }
 
     function renderizarDespensa() {
