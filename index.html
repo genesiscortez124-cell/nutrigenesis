@@ -447,6 +447,9 @@
             background: linear-gradient(135deg, var(--danger), #8f2a2e);
         }
         .header-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+        .comidas-check-group { display: flex; flex-wrap: wrap; gap: 6px 10px; margin: 4px 0 8px; }
+        .comidas-check-group label { display: flex; align-items: center; gap: 4px; font-size: 0.72rem; color: var(--text-muted); cursor: pointer; }
+        .comidas-check-group input { accent-color: var(--primary); width: 14px; height: 14px; }
 
         .progress-container {
             background: var(--bg-darker);
@@ -720,6 +723,17 @@
                     <label>Calorías aprox. de esa ración (opcional)</label>
                     <input type="number" id="nuevo-stock-calorias" class="form-control" placeholder="Ej: 250" min="0" step="any">
                 </div>
+                <div class="form-group">
+                    <label>¿En qué comidas puede salir sorteado? (opcional)</label>
+                    <div class="comidas-check-group" id="nuevo-stock-comidas">
+                        <label><input type="checkbox" value="desayuno">🌅 Desayuno</label>
+                        <label><input type="checkbox" value="colacion1">🍎 Colación 1</label>
+                        <label><input type="checkbox" value="almuerzo">🍽️ Almuerzo</label>
+                        <label><input type="checkbox" value="colacion2">☕ Colación 2</label>
+                        <label><input type="checkbox" value="cena">🌙 Cena</label>
+                    </div>
+                    <p style="font-size: 0.66rem; color: var(--text-muted); margin: -4px 0 8px;">Si no marcas ninguna, se asigna automáticamente según la categoría (ej: proteínas solo en almuerzo/cena).</p>
+                </div>
                 <p style="font-size: 0.68rem; color: var(--text-muted); margin: -4px 0 8px;">Si completas ración y calorías, este producto podrá salir sorteado automáticamente en la Minuta del Día 🎲</p>
                 <button class="btn-action" onclick="agregarProductoPersonalizado()">Agregar a la despensa</button>
             </div>
@@ -848,7 +862,18 @@
                 <label>Calorías aprox. de esa ración</label>
                 <input type="number" id="modal-calorias-input" class="form-control" min="0" step="any" inputmode="decimal">
             </div>
-            <p style="font-size:0.68rem; color:var(--text-muted); margin:-4px 0 4px;">Deja ambos campos en blanco o en 0 para que este producto no participe en el sorteo automático de comidas.</p>
+            <div class="form-group">
+                <label>¿En qué comidas puede salir sorteado?</label>
+                <div class="comidas-check-group" id="modal-racion-comidas">
+                    <label><input type="checkbox" value="desayuno">🌅 Desayuno</label>
+                    <label><input type="checkbox" value="colacion1">🍎 Colación 1</label>
+                    <label><input type="checkbox" value="almuerzo">🍽️ Almuerzo</label>
+                    <label><input type="checkbox" value="colacion2">☕ Colación 2</label>
+                    <label><input type="checkbox" value="cena">🌙 Cena</label>
+                </div>
+                <p style="font-size:0.66rem; color:var(--text-muted); margin:-4px 0 4px;">Sin marcar ninguna: se usa el criterio automático según la categoría del producto.</p>
+            </div>
+            <p style="font-size:0.68rem; color:var(--text-muted); margin:-4px 0 4px;">Deja ración y calorías en blanco o en 0 para que este producto no participe en el sorteo automático de comidas.</p>
             <p class="input-error-msg" id="modal-racion-error"></p>
             <div class="modal-actions">
                 <button class="btn-secondary" id="modal-racion-cancel" style="background:#374151;">Cancelar</button>
@@ -869,32 +894,32 @@
 
     // Despensa de fábrica: se usa al abrir la app por primera vez y al pulsar "Restablecer"
     const DESPENSA_POR_DEFECTO = {
-        k1_pechuga_de_pollo: { nombre: "Pechuga de pollo", stock: 850, max: 850, unidad: "gr", categoria: "proteinas", racion: 150, calorias: 248 },
-        k2_avena: { nombre: "Avena", stock: 550, max: 550, unidad: "gr", categoria: "cereales", racion: 50, calorias: 190 },
-        k3_palta_hass: { nombre: "Palta hass", stock: 5, max: 5, unidad: "unid", categoria: "frescos", racion: 0.5, calorias: 120 },
-        k4_chia: { nombre: "Chía", stock: 250, max: 250, unidad: "gr", categoria: "cereales", racion: 15, calorias: 70 },
+        k1_pechuga_de_pollo: { nombre: "Pechuga de pollo", stock: 850, max: 850, unidad: "gr", categoria: "proteinas", racion: 150, calorias: 248, comidas: ["almuerzo", "cena"] },
+        k2_avena: { nombre: "Avena", stock: 550, max: 550, unidad: "gr", categoria: "cereales", racion: 50, calorias: 190, comidas: ["desayuno"] },
+        k3_palta_hass: { nombre: "Palta hass", stock: 5, max: 5, unidad: "unid", categoria: "frescos", racion: 0.5, calorias: 120, comidas: ["desayuno", "colacion1", "almuerzo"] },
+        k4_chia: { nombre: "Chía", stock: 250, max: 250, unidad: "gr", categoria: "cereales", racion: 15, calorias: 70, comidas: ["desayuno", "colacion2"] },
         k5_salsa_de_tomate: { nombre: "Salsa de tomate", stock: 4, max: 4, unidad: "unid", categoria: "cereales" },
-        k6_leche_descremada: { nombre: "Leche descremada", stock: 4, max: 4, unidad: "litros", categoria: "proteinas", racion: 0.2, calorias: 70 },
-        k7_atun_lomitos: { nombre: "Atún Lomitos", stock: 4, max: 4, unidad: "latas", categoria: "proteinas", racion: 1, calorias: 120 },
+        k6_leche_descremada: { nombre: "Leche descremada", stock: 4, max: 4, unidad: "litros", categoria: "proteinas", racion: 0.2, calorias: 70, comidas: ["desayuno", "colacion1", "colacion2"] },
+        k7_atun_lomitos: { nombre: "Atún Lomitos", stock: 4, max: 4, unidad: "latas", categoria: "proteinas", racion: 1, calorias: 120, comidas: ["almuerzo", "cena"] },
         k8_jalea_sin_azucar: { nombre: "Jalea sin azúcar", stock: 4, max: 4, unidad: "unid", categoria: "cereales" },
         k9_chocolate_cacao: { nombre: "Chocolate cacao", stock: 1, max: 1, unidad: "barra", categoria: "proteinas" },
         k10_mantequilla_de_mani: { nombre: "Mantequilla de maní", stock: 510, max: 510, unidad: "gr", categoria: "cereales" },
-        k11_almendras: { nombre: "Almendras", stock: 80, max: 80, unidad: "gr", categoria: "cereales", racion: 30, calorias: 175 },
+        k11_almendras: { nombre: "Almendras", stock: 80, max: 80, unidad: "gr", categoria: "cereales", racion: 30, calorias: 175, comidas: ["colacion1", "colacion2"] },
         k12_papas: { nombre: "Papas", stock: 3, max: 3, unidad: "unid", categoria: "frescos" },
-        k13_tomates_cherry: { nombre: "Tomates cherry", stock: 250, max: 250, unidad: "gr", categoria: "frescos", racion: 100, calorias: 20 },
-        k14_lechuga: { nombre: "Lechuga", stock: 1, max: 1, unidad: "unid", categoria: "frescos", racion: 0.2, calorias: 10 },
-        k15_platanos: { nombre: "Plátanos", stock: 3, max: 3, unidad: "unid", categoria: "frescos", racion: 1, calorias: 90 },
+        k13_tomates_cherry: { nombre: "Tomates cherry", stock: 250, max: 250, unidad: "gr", categoria: "frescos", racion: 100, calorias: 20, comidas: ["colacion1", "almuerzo", "cena"] },
+        k14_lechuga: { nombre: "Lechuga", stock: 1, max: 1, unidad: "unid", categoria: "frescos", racion: 0.2, calorias: 10, comidas: ["almuerzo", "cena"] },
+        k15_platanos: { nombre: "Plátanos", stock: 3, max: 3, unidad: "unid", categoria: "frescos", racion: 1, calorias: 90, comidas: ["desayuno", "colacion1", "colacion2"] },
         k16_cibulette: { nombre: "Cibulette", stock: 1, max: 1, unidad: "paq", categoria: "frescos" },
-        k17_pera: { nombre: "Pera", stock: 3, max: 3, unidad: "unid", categoria: "frescos", racion: 1, calorias: 80 },
-        k18_manzanas: { nombre: "Manzanas", stock: 3, max: 3, unidad: "unid", categoria: "frescos", racion: 1, calorias: 80 },
+        k17_pera: { nombre: "Pera", stock: 3, max: 3, unidad: "unid", categoria: "frescos", racion: 1, calorias: 80, comidas: ["colacion1", "colacion2"] },
+        k18_manzanas: { nombre: "Manzanas", stock: 3, max: 3, unidad: "unid", categoria: "frescos", racion: 1, calorias: 80, comidas: ["colacion1", "colacion2"] },
         k19_galletas_de_arroz: { nombre: "Galletas de arroz", stock: 13, max: 13, unidad: "unid", categoria: "cereales" },
         k20_pan_integral_protein: { nombre: "Pan integral protein", stock: 13, max: 13, unidad: "unid", categoria: "cereales" },
-        k21_quesillo: { nombre: "Quesillo", stock: 2, max: 2, unidad: "unid", categoria: "proteinas", racion: 0.5, calorias: 90 },
-        k22_yoghurt_protein: { nombre: "Yoghurt protein", stock: 5, max: 5, unidad: "unid", categoria: "proteinas", racion: 1, calorias: 100 },
-        k23_carne_de_vacuno: { nombre: "Carne de vacuno", stock: 250, max: 250, unidad: "gr", categoria: "proteinas", racion: 150, calorias: 280 },
-        k24_huevos: { nombre: "Huevos", stock: 12, max: 12, unidad: "unid", categoria: "proteinas", racion: 1, calorias: 70 },
-        k25_fideos: { nombre: "Fideos", stock: 2, max: 2, unidad: "kilos", categoria: "cereales", racion: 0.1, calorias: 150 },
-        k26_arroz: { nombre: "Arroz", stock: 2, max: 2, unidad: "kilos", categoria: "cereales", racion: 0.1, calorias: 130 }
+        k21_quesillo: { nombre: "Quesillo", stock: 2, max: 2, unidad: "unid", categoria: "proteinas", racion: 0.5, calorias: 90, comidas: ["desayuno", "colacion1", "colacion2"] },
+        k22_yoghurt_protein: { nombre: "Yoghurt protein", stock: 5, max: 5, unidad: "unid", categoria: "proteinas", racion: 1, calorias: 100, comidas: ["desayuno", "colacion1", "colacion2"] },
+        k23_carne_de_vacuno: { nombre: "Carne de vacuno", stock: 250, max: 250, unidad: "gr", categoria: "proteinas", racion: 150, calorias: 280, comidas: ["almuerzo", "cena"] },
+        k24_huevos: { nombre: "Huevos", stock: 12, max: 12, unidad: "unid", categoria: "proteinas", racion: 1, calorias: 70, comidas: ["desayuno", "almuerzo", "cena"] },
+        k25_fideos: { nombre: "Fideos", stock: 2, max: 2, unidad: "kilos", categoria: "cereales", racion: 0.1, calorias: 150, comidas: ["almuerzo", "cena"] },
+        k26_arroz: { nombre: "Arroz", stock: 2, max: 2, unidad: "kilos", categoria: "cereales", racion: 0.1, calorias: 130, comidas: ["almuerzo", "cena"] }
     };
 
     // Copia profunda para que editar el stock nunca modifique la plantilla original
@@ -1015,6 +1040,7 @@
             const errorMsg = document.getElementById('modal-racion-error');
             const btnOk = document.getElementById('modal-racion-ok');
             const btnCancel = document.getElementById('modal-racion-cancel');
+            const comidasChecks = document.querySelectorAll('#modal-racion-comidas input[type=checkbox]');
 
             document.getElementById('modal-racion-label').innerText = `Datos para la minuta automática — ${item.nombre} (${item.unidad}):`;
             inputRacion.value = item.racion || '';
@@ -1022,14 +1048,16 @@
             inputRacion.classList.remove('input-error');
             inputCalorias.classList.remove('input-error');
             errorMsg.innerText = '';
+            comidasChecks.forEach(chk => { chk.checked = !!(item.comidas && item.comidas.includes(chk.value)); });
 
             function validarYCerrar() {
                 const racionTxt = inputRacion.value.trim();
                 const caloriasTxt = inputCalorias.value.trim();
+                const comidasSeleccionadas = Array.from(comidasChecks).filter(c => c.checked).map(c => c.value);
 
                 // Ambos vacíos (o en 0): el producto queda fuera del sorteo automático
                 if ((racionTxt === '' || Number(racionTxt) === 0) && (caloriasTxt === '' || Number(caloriasTxt) === 0)) {
-                    cerrar({ racion: null, calorias: null });
+                    cerrar({ racion: null, calorias: null, comidas: comidasSeleccionadas });
                     return;
                 }
 
@@ -1041,7 +1069,7 @@
                     errorMsg.innerText = 'Completa ambos campos con números válidos, o déjalos vacíos.';
                     return;
                 }
-                cerrar({ racion, calorias });
+                cerrar({ racion, calorias, comidas: comidasSeleccionadas });
             }
 
             function cerrar(resultado) {
@@ -1225,6 +1253,30 @@
         }
     }
 
+    // Comidas del día para las que un producto puede salir sorteado
+    const comidasDisponibles = [
+        { id: 'desayuno',  label: '🌅 Desayuno' },
+        { id: 'colacion1', label: '🍎 Colación 1' },
+        { id: 'almuerzo',  label: '🍽️ Almuerzo' },
+        { id: 'colacion2', label: '☕ Colación 2' },
+        { id: 'cena',      label: '🌙 Cena' }
+    ];
+
+    // Si un producto no tiene "comidas" configuradas explícitamente (productos antiguos o
+    // importados), se usa este criterio por categoría para no mezclar, p.ej., carne en el desayuno.
+    function comidasPorDefectoSegunCategoria(categoria) {
+        switch (categoria) {
+            case 'proteinas': return ['almuerzo', 'cena'];
+            case 'cereales':  return ['desayuno', 'colacion2', 'almuerzo', 'cena'];
+            case 'frescos':   return ['colacion1', 'almuerzo', 'colacion2', 'cena'];
+            default:          return ['desayuno', 'colacion1', 'almuerzo', 'colacion2', 'cena'];
+        }
+    }
+
+    function comidasDelItem(item) {
+        return (item.comidas && item.comidas.length) ? item.comidas : comidasPorDefectoSegunCategoria(item.categoria);
+    }
+
     // Plantillas de comidas: de qué categorías se puede tomar cada ingrediente
     const plantillasMinuta = {
         desayuno:  { icono: '🌅', label: 'Desayuno',   bloques: [ { categorias: ['proteinas'] }, { categorias: ['cereales'] } ] },
@@ -1234,15 +1286,17 @@
         cena:      { icono: '🌙', label: 'Cena',       bloques: [ { categorias: ['proteinas'] }, { categorias: ['cereales'] } ] }
     };
 
-    // Ítems de una o más categorías que tienen ración/calorías configuradas y stock suficiente
-    function obtenerIngredientesDisponibles(categorias, excluirKeys) {
+    // Ítems de una o más categorías que tienen ración/calorías configuradas, stock suficiente,
+    // y que además están habilitados para la comida ("slot") que se está armando.
+    function obtenerIngredientesDisponibles(categorias, excluirKeys, slot) {
         return Object.keys(despensa).filter(k => {
             const it = despensa[k];
             return categorias.includes(it.categoria)
                 && it.racion > 0
                 && it.calorias !== undefined && it.calorias !== null
                 && it.stock >= it.racion
-                && !excluirKeys.includes(k);
+                && !excluirKeys.includes(k)
+                && comidasDelItem(it).includes(slot);
         });
     }
 
@@ -1277,7 +1331,7 @@
         return keys;
     }
 
-    function armarComida(bloques, usadosGlobalHoy, evitarRecientes) {
+    function armarComida(bloques, usadosGlobalHoy, evitarRecientes, slot) {
         const items = [];
         bloques.forEach(bloque => {
             const usadosLocales = items.map(i => i.key);
@@ -1285,9 +1339,9 @@
 
             // Primero intenta evitar ingredientes usados en días recientes (variedad);
             // si no queda ninguna alternativa disponible, los vuelve a permitir.
-            let disponibles = obtenerIngredientesDisponibles(bloque.categorias, excluir.concat(evitarRecientes));
+            let disponibles = obtenerIngredientesDisponibles(bloque.categorias, excluir.concat(evitarRecientes), slot);
             if (disponibles.length === 0) {
-                disponibles = obtenerIngredientesDisponibles(bloque.categorias, excluir);
+                disponibles = obtenerIngredientesDisponibles(bloque.categorias, excluir, slot);
             }
             if (disponibles.length === 0) return;
 
@@ -1311,7 +1365,7 @@
 
         const html = Object.keys(plantillasMinuta).map(slot => {
             const plantilla = plantillasMinuta[slot];
-            const comida = armarComida(plantilla.bloques, usadosGlobalHoy, evitarRecientes);
+            const comida = armarComida(plantilla.bloques, usadosGlobalHoy, evitarRecientes, slot);
             minutaActual[slot] = comida;
             totalCal += comida.cal;
             return `
@@ -1526,6 +1580,10 @@
             despensa[key].racion = racion;
             despensa[key].calorias = calorias;
         }
+        const comidasSeleccionadas = Array.from(document.querySelectorAll('#nuevo-stock-comidas input[type=checkbox]:checked')).map(c => c.value);
+        if (comidasSeleccionadas.length) {
+            despensa[key].comidas = comidasSeleccionadas;
+        }
         guardarDatosEnLocal();
         renderizarDespensa();
 
@@ -1534,6 +1592,7 @@
         unidadInput.value = '';
         racionInput.value = '';
         caloriasInput.value = '';
+        document.querySelectorAll('#nuevo-stock-comidas input[type=checkbox]').forEach(c => c.checked = false);
 
         mostrarToast(`📦 "${nombre}" agregado a tu despensa.`);
     }
@@ -1791,6 +1850,11 @@
         if (!item) return;
         const resultado = await mostrarPromptRacion(item);
         if (resultado === null) return;
+        if (resultado.comidas && resultado.comidas.length) {
+            item.comidas = resultado.comidas;
+        } else {
+            delete item.comidas;
+        }
         if (resultado.racion === null) {
             delete item.racion;
             delete item.calorias;
