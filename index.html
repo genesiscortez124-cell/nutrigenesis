@@ -639,7 +639,7 @@
                     <span>🎲 Minuta del Día</span>
                     <span id="total-calorias-dia" class="calories-badge">0 kcal</span>
                 </h3>
-                <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 8px;">Rotación aleatoria con conteo calórico aproximado.</p>
+                <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 8px;">Sorteo inteligente: prioriza productos con menos stock restante, evita repetir un mismo ingrediente en el día y varía respecto a los últimos días.</p>
                 <div id="contenedor-minuta"></div>
                 <button class="btn-action" onclick="registrarComidaHoy()">✓ Registrar Consumo y Calorías</button>
                 <button class="btn-secondary" style="margin-top:6px;" onclick="generarNuevaMinuta()">🔄 Rotar Menú</button>
@@ -666,6 +666,18 @@
 
                 <p style="font-size: 0.75rem; color: var(--primary); font-weight: bold; margin: 10px 0 6px;">🧺 Otros productos</p>
                 <div class="pantry-grid" id="grid-otros"></div>
+            </div>
+
+            <div class="card">
+                <h3><span>📥 Importar lista de supermercado</span></h3>
+                <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 8px;">Pega tu lista, un producto por línea, separando los datos con coma (,): <strong>Nombre, Categoría, Cantidad, Unidad</strong></p>
+                <p style="font-size: 0.68rem; color: var(--text-muted); margin: -4px 0 8px; font-style: italic;">Ej: Pechuga de pollo, proteinas, 1000, g<br>Ej: Palta hass, frescos, 5, unid</p>
+                <p style="font-size: 0.66rem; color: var(--text-muted); margin: -4px 0 8px;">Categorías válidas: proteinas, cereales, frescos, otros (si escribes algo distinto, se intenta reconocer o se asigna a "otros"). Si un producto ya existe en tu despensa (mismo nombre), su cantidad se suma al stock actual; si no existe, se crea como producto nuevo.</p>
+                <p style="font-size: 0.66rem; color: var(--text-muted); margin: -4px 0 8px;">🎯 Si reconocemos el producto (pollo, arroz, huevo, palta, atún, etc.) y la unidad que escribiste coincide con la esperada, completamos automáticamente su ración y calorías para que entre de inmediato al sorteo de la minuta. Si no, puedes configurarlas después con el botón 🎯 de cada producto.</p>
+                <div class="form-group">
+                    <textarea id="import-lista-texto" class="form-control" rows="5" style="resize: vertical; font-family: monospace;" placeholder="Pechuga de pollo, proteinas, 1000, g&#10;Avena, cereales, 800, g&#10;Palta hass, frescos, 5, unid"></textarea>
+                </div>
+                <button class="btn-action" onclick="importarListaSupermercado()">📥 Importar lista</button>
             </div>
 
             <div class="card">
@@ -1211,15 +1223,55 @@
         });
     }
 
-    function armarComida(bloques) {
+    // Sortea un ingrediente entre los candidatos, dando más probabilidad a los que tienen
+    // menos porciones restantes en stock, para rotarlos e ir usándolos antes de que se agoten o venzan.
+    function elegirIngredienteInteligente(candidatos) {
+        if (candidatos.length === 0) return null;
+        if (candidatos.length === 1) return candidatos[0];
+
+        const pesos = candidatos.map(key => {
+            const it = despensa[key];
+            const porcionesRestantes = Math.max(1, it.stock / it.racion);
+            return { key, peso: 1 / porcionesRestantes };
+        });
+        const totalPeso = pesos.reduce((acc, p) => acc + p.peso, 0);
+        let r = Math.random() * totalPeso;
+        for (const p of pesos) {
+            r -= p.peso;
+            if (r <= 0) return p.key;
+        }
+        return pesos[pesos.length - 1].key;
+    }
+
+    // Claves de ingredientes usados en los últimos "diasAtras" días registrados, para variar la minuta.
+    function obtenerIngredientesRecientes(diasAtras = 2) {
+        const dias = Object.keys(historialDias).sort().reverse().slice(0, diasAtras);
+        const keys = [];
+        dias.forEach(fecha => {
+            const usados = historialDias[fecha].itemsUsados;
+            if (usados) usados.forEach(u => { if (!keys.includes(u.key)) keys.push(u.key); });
+        });
+        return keys;
+    }
+
+    function armarComida(bloques, usadosGlobalHoy, evitarRecientes) {
         const items = [];
         bloques.forEach(bloque => {
-            const usados = items.map(i => i.key);
-            const disponibles = obtenerIngredientesDisponibles(bloque.categorias, usados);
+            const usadosLocales = items.map(i => i.key);
+            const excluir = usadosGlobalHoy.concat(usadosLocales);
+
+            // Primero intenta evitar ingredientes usados en días recientes (variedad);
+            // si no queda ninguna alternativa disponible, los vuelve a permitir.
+            let disponibles = obtenerIngredientesDisponibles(bloque.categorias, excluir.concat(evitarRecientes));
+            if (disponibles.length === 0) {
+                disponibles = obtenerIngredientesDisponibles(bloque.categorias, excluir);
+            }
             if (disponibles.length === 0) return;
-            const key = disponibles[Math.floor(Math.random() * disponibles.length)];
+
+            const key = elegirIngredienteInteligente(disponibles);
             const it = despensa[key];
             items.push({ key, nombre: it.nombre, racion: it.racion, unidad: it.unidad, calorias: it.calorias });
+            usadosGlobalHoy.push(key);
         });
         const cal = items.reduce((acc, i) => acc + i.calorias, 0);
         const text = items.length
@@ -1231,10 +1283,12 @@
     function generarNuevaMinuta() {
         minutaActual = {};
         let totalCal = 0;
+        const usadosGlobalHoy = [];
+        const evitarRecientes = obtenerIngredientesRecientes(2);
 
         const html = Object.keys(plantillasMinuta).map(slot => {
             const plantilla = plantillasMinuta[slot];
-            const comida = armarComida(plantilla.bloques);
+            const comida = armarComida(plantilla.bloques, usadosGlobalHoy, evitarRecientes);
             minutaActual[slot] = comida;
             totalCal += comida.cal;
             return `
@@ -1440,6 +1494,205 @@
         caloriasInput.value = '';
 
         mostrarToast(`📦 "${nombre}" agregado a tu despensa.`);
+    }
+
+    // --- Importación masiva de lista de supermercado ---
+
+    function detectarSeparadorLinea(linea) {
+        if (linea.includes('\t')) return '\t';
+        if (linea.includes(';')) return ';';
+        return ',';
+    }
+
+    function normalizarTexto(t) {
+        return (t || '').toString().trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function normalizarCategoriaImport(txt) {
+        const t = normalizarTexto(txt);
+        if (!t) return 'otros';
+        if (categoriasDespensa.some(c => c.id === t)) return t;
+        if (t.includes('prote') || t.includes('lact')) return 'proteinas';
+        if (t.includes('cereal') || t.includes('desp') || t.includes('gran') || t.includes('pan') || t.includes('legum')) return 'cereales';
+        if (t.includes('fresc') || t.includes('frut') || t.includes('verdur') || t.includes('vegetal') || t.includes('vegg')) return 'frescos';
+        return 'otros';
+    }
+
+    function buscarKeyPorNombre(nombreNormalizado) {
+        return Object.keys(despensa).find(k => normalizarTexto(despensa[k].nombre) === nombreNormalizado);
+    }
+
+    // Base de calorías de alimentos comunes: ración típica, unidad esperada y calorías aprox. de esa ración.
+    // Se usa para autocompletar ración/calorías al importar, cuando reconocemos el producto y la unidad coincide.
+    const baseCaloricaComun = {
+        'pollo': { racion: 150, unidad: 'g', calorias: 248 },
+        'pechuga': { racion: 150, unidad: 'g', calorias: 248 },
+        'posta': { racion: 150, unidad: 'g', calorias: 300 },
+        'carne molida': { racion: 150, unidad: 'g', calorias: 280 },
+        'lomo': { racion: 150, unidad: 'g', calorias: 270 },
+        'cerdo': { racion: 150, unidad: 'g', calorias: 290 },
+        'pavo': { racion: 150, unidad: 'g', calorias: 200 },
+        'salmon': { racion: 150, unidad: 'g', calorias: 310 },
+        'atun': { racion: 1, unidad: 'latas', calorias: 120 },
+        'huevo': { racion: 1, unidad: 'unid', calorias: 70 },
+        'huevos': { racion: 1, unidad: 'unid', calorias: 70 },
+        'leche': { racion: 200, unidad: 'ml', calorias: 70 },
+        'yogur griego': { racion: 1, unidad: 'unid', calorias: 130 },
+        'yogurt': { racion: 1, unidad: 'unid', calorias: 100 },
+        'quesillo': { racion: 0.5, unidad: 'unid', calorias: 90 },
+        'queso': { racion: 30, unidad: 'g', calorias: 100 },
+        'jamon': { racion: 30, unidad: 'g', calorias: 60 },
+        'tofu': { racion: 100, unidad: 'g', calorias: 90 },
+        'camaron': { racion: 100, unidad: 'g', calorias: 100 },
+        'pan integral': { racion: 2, unidad: 'rej', calorias: 130 },
+        'pan': { racion: 2, unidad: 'rej', calorias: 140 },
+        'avena': { racion: 50, unidad: 'g', calorias: 190 },
+        'arroz': { racion: 100, unidad: 'g', calorias: 130 },
+        'fideos': { racion: 100, unidad: 'g', calorias: 150 },
+        'pasta': { racion: 100, unidad: 'g', calorias: 150 },
+        'quinoa': { racion: 100, unidad: 'g', calorias: 120 },
+        'lenteja': { racion: 100, unidad: 'g', calorias: 115 },
+        'lentejas': { racion: 100, unidad: 'g', calorias: 115 },
+        'garbanzo': { racion: 100, unidad: 'g', calorias: 160 },
+        'garbanzos': { racion: 100, unidad: 'g', calorias: 160 },
+        'poroto': { racion: 100, unidad: 'g', calorias: 130 },
+        'porotos': { racion: 100, unidad: 'g', calorias: 130 },
+        'galleta de arroz': { racion: 0.3, unidad: 'paq', calorias: 115 },
+        'mantequilla de mani': { racion: 0.1, unidad: 'frasco', calorias: 95 },
+        'almendra': { racion: 30, unidad: 'g', calorias: 175 },
+        'almendras': { racion: 30, unidad: 'g', calorias: 175 },
+        'nuez': { racion: 30, unidad: 'g', calorias: 190 },
+        'nueces': { racion: 30, unidad: 'g', calorias: 190 },
+        'semilla de chia': { racion: 15, unidad: 'g', calorias: 70 },
+        'miel': { racion: 15, unidad: 'g', calorias: 45 },
+        'cereal': { racion: 40, unidad: 'g', calorias: 150 },
+        'palta': { racion: 0.5, unidad: 'unid', calorias: 120 },
+        'lechuga': { racion: 0.2, unidad: 'unid', calorias: 10 },
+        'tomate': { racion: 100, unidad: 'g', calorias: 20 },
+        'zanahoria': { racion: 1, unidad: 'unid', calorias: 25 },
+        'papa': { racion: 150, unidad: 'g', calorias: 130 },
+        'papas': { racion: 150, unidad: 'g', calorias: 130 },
+        'manzana': { racion: 1, unidad: 'unid', calorias: 80 },
+        'pera': { racion: 1, unidad: 'unid', calorias: 80 },
+        'platano': { racion: 1, unidad: 'unid', calorias: 90 },
+        'naranja': { racion: 1, unidad: 'unid', calorias: 60 },
+        'pepino': { racion: 100, unidad: 'g', calorias: 15 },
+        'pimenton': { racion: 100, unidad: 'g', calorias: 30 },
+        'brocoli': { racion: 100, unidad: 'g', calorias: 35 },
+        'espinaca': { racion: 100, unidad: 'g', calorias: 23 },
+        'cebolla': { racion: 100, unidad: 'g', calorias: 40 },
+        'betarraga': { racion: 100, unidad: 'g', calorias: 43 },
+        'choclo': { racion: 100, unidad: 'g', calorias: 96 },
+        'kiwi': { racion: 1, unidad: 'unid', calorias: 45 },
+        'uva': { racion: 100, unidad: 'g', calorias: 70 },
+        'uvas': { racion: 100, unidad: 'g', calorias: 70 },
+        'sandia': { racion: 150, unidad: 'g', calorias: 45 },
+        'pina': { racion: 150, unidad: 'g', calorias: 75 }
+    };
+
+    // Convierte variantes de unidad ("gr", "gramos", "und"...) a una forma estándar comparable.
+    function normalizarUnidad(u) {
+        const t = normalizarTexto(u);
+        if (['g', 'gr', 'grs', 'gramo', 'gramos'].includes(t)) return 'g';
+        if (['ml', 'mililitro', 'mililitros'].includes(t)) return 'ml';
+        if (['unid', 'unidad', 'unidades', 'und', 'u'].includes(t)) return 'unid';
+        if (['lata', 'latas'].includes(t)) return 'latas';
+        if (['paq', 'paquete', 'paquetes'].includes(t)) return 'paq';
+        if (['frasco', 'frascos'].includes(t)) return 'frasco';
+        if (['rej', 'rebanada', 'rebanadas'].includes(t)) return 'rej';
+        return t;
+    }
+
+    // Busca el alimento más específico de la base de calorías cuyo nombre aparezca como palabra(s)
+    // completa(s) dentro del nombre del producto importado (para evitar coincidencias falsas parciales).
+    function buscarEnBaseCalorica(nombreNormalizado) {
+        if (baseCaloricaComun[nombreNormalizado]) return baseCaloricaComun[nombreNormalizado];
+        let mejorClave = null, mejorLargo = 0;
+        for (const clave in baseCaloricaComun) {
+            const escapada = clave.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp('(^|\\s)' + escapada + '(\\s|$)');
+            if (regex.test(nombreNormalizado) && clave.length > mejorLargo) {
+                mejorClave = clave;
+                mejorLargo = clave.length;
+            }
+        }
+        return mejorClave ? baseCaloricaComun[mejorClave] : null;
+    }
+
+    function importarListaSupermercado() {
+        const textarea = document.getElementById('import-lista-texto');
+        const texto = textarea.value;
+        if (!texto || !texto.trim()) {
+            mostrarToast('⚠️ Pega tu lista antes de importar.', 2800, true);
+            return;
+        }
+
+        const lineas = texto.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+        let nuevos = 0, actualizados = 0, errores = 0, conCalorias = 0, primeraLinea = true;
+
+        lineas.forEach(linea => {
+            const sep = detectarSeparadorLinea(linea);
+            const partes = linea.split(sep).map(p => p.trim().replace(/^["']|["']$/g, ''));
+
+            // Salta una posible fila de encabezado (Nombre, Categoría, Cantidad, Unidad)
+            if (primeraLinea) {
+                primeraLinea = false;
+                const posibleHeader = normalizarTexto(partes[0]);
+                if (['nombre', 'producto', 'item', 'articulo'].includes(posibleHeader)) return;
+            }
+
+            if (partes.length < 4) { errores++; return; }
+
+            const [nombreRaw, categoriaRaw, cantidadRaw, unidadRaw] = partes;
+            const nombre = (nombreRaw || '').trim();
+            const cantidad = parseFloat((cantidadRaw || '').replace(',', '.'));
+            const unidad = (unidadRaw || '').trim();
+            const categoria = normalizarCategoriaImport(categoriaRaw);
+
+            if (!nombre || !unidad || isNaN(cantidad) || cantidad < 0) { errores++; return; }
+
+            const nombreNorm = normalizarTexto(nombre);
+            const keyExistente = buscarKeyPorNombre(nombreNorm);
+            const unidadNorm = normalizarUnidad(unidad);
+            const matchCalorico = buscarEnBaseCalorica(nombreNorm);
+            const aplicaAutoCalorias = matchCalorico && matchCalorico.unidad === unidadNorm;
+
+            if (keyExistente) {
+                despensa[keyExistente].stock = (despensa[keyExistente].stock || 0) + cantidad;
+                despensa[keyExistente].max = Math.max(despensa[keyExistente].max || 0, despensa[keyExistente].stock);
+                if (unidad) despensa[keyExistente].unidad = unidad;
+                // Solo autocompleta calorías si el producto todavía no tenía ración/calorías configuradas.
+                if (aplicaAutoCalorias && !despensa[keyExistente].racion && !despensa[keyExistente].calorias) {
+                    despensa[keyExistente].racion = matchCalorico.racion;
+                    despensa[keyExistente].calorias = matchCalorico.calorias;
+                    conCalorias++;
+                }
+                actualizados++;
+            } else {
+                const key = 'custom_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+                despensa[key] = { nombre, stock: cantidad, max: cantidad, unidad, categoria };
+                if (aplicaAutoCalorias) {
+                    despensa[key].racion = matchCalorico.racion;
+                    despensa[key].calorias = matchCalorico.calorias;
+                    conCalorias++;
+                }
+                nuevos++;
+            }
+        });
+
+        if (nuevos === 0 && actualizados === 0) {
+            mostrarToast('⚠️ No se pudo interpretar ninguna línea. Revisa el formato: Nombre, Categoría, Cantidad, Unidad.', 4000, true);
+            return;
+        }
+
+        guardarDatosEnLocal();
+        renderizarDespensa();
+        textarea.value = '';
+
+        let msg = `📥 Importación lista: ${nuevos} nuevo(s), ${actualizados} actualizado(s)`;
+        if (conCalorias > 0) msg += `, ${conCalorias} con calorías autocompletadas 🎯`;
+        if (errores > 0) msg += `, ${errores} línea(s) con error de formato`;
+        mostrarToast(msg, 4200);
     }
 
     async function eliminarProductoPersonalizado(key) {
