@@ -1,2038 +1,297 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
-    <title>NutriGenesis Pro - Historial Detallado</title>
-    <style>
-        :root {
-            --bg-dark: #0f2420;
-            --bg-darker: #091613;
-            --card-dark: #17322a;
-            --card-soft: #1d3b30;
-            --line: #2a4a3d;
-            --primary: #5fb87a;
-            --primary-strong: #3f9c5c;
-            --primary-glow: rgba(95, 184, 122, 0.28);
-            --accent: #8a5a3b;
-            --accent-warm: #f2a541;
-            --pink: #e2574c;
-            --gold: #ffce54;
-            --text-main: #f7f2e6;
-            --text-muted: #9db6aa;
-            --danger: #e5484d;
-            --radius: 22px;
-            --font-display: 'Baloo 2', system-ui, sans-serif;
-            --font-body: 'Nunito', system-ui, sans-serif;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-body); }
-        h1, h2, .app-header-text h1, .modal-header h2 { font-family: var(--font-display); }
-        body {
-            background: radial-gradient(circle at top, #1c3a30 0%, var(--bg-darker) 100%);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 15px;
-        }
-        .phone-frame {
-            width: 100%;
-            max-width: 440px;
-            background: var(--card-dark);
-            border-radius: 40px;
-            box-shadow: 0 25px 55px -12px rgba(0, 0, 0, 0.85);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 94vh;
-            border: 4px solid #24463a;
-            position: relative;
-        }
-        .app-header {
-            background: linear-gradient(135deg, var(--accent-warm) 0%, var(--pink) 55%, var(--accent) 100%);
-            color: white;
-            padding: 14px 18px 10px;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .app-header-text h1 { font-size: 1.3rem; font-weight: 800; text-align: left; letter-spacing: 0.3px; }
-        .app-header-text p { font-size: 0.68rem; opacity: 0.95; text-align: left; margin-top: 1px; font-weight: 700; }
-
-        .xp-pill {
-            background: rgba(0,0,0,0.25);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: #fff;
-            font-size: 0.65rem;
-            font-weight: 800;
-            padding: 3px 9px;
-            border-radius: 20px;
-            white-space: nowrap;
-        }
-
-        /* Franja hero de la mascota */
-        .mascot-hero {
-            background: linear-gradient(180deg, rgba(242, 165, 65, 0.20), transparent);
-            padding: 14px 16px 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-        .mascot-hero:active { transform: scale(0.98); }
-
-        /* Mascota Super Interactiva */
-        .pet-avatar-wrap {
-            width: 66px;
-            height: 66px;
-            min-width: 66px;
-            position: relative;
-            background: radial-gradient(circle at 35% 30%, rgba(255, 206, 84, 0.35), rgba(138, 90, 59, 0.3));
-            border: 2px solid rgba(255, 206, 84, 0.5);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 18px rgba(255, 206, 84, 0.25);
-            animation: float 2.6s ease-in-out infinite;
-            transition: box-shadow 0.4s ease, border-color 0.4s ease;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-4px); }
-        }
-
-        .fox-mascot { width: 78%; height: 78%; display: block; overflow: visible; }
-        .fox-ear { transform-box: fill-box; transform-origin: 50% 100%; animation: earTwitch 5s ease-in-out infinite; }
-        .fox-ear-right { animation-delay: 0.3s; }
-        @keyframes earTwitch {
-            0%, 82%, 100% { transform: rotate(0deg); }
-            88% { transform: rotate(-7deg); }
-            94% { transform: rotate(5deg); }
-        }
-        .fox-tail { transform-box: fill-box; transform-origin: 15% 15%; animation: tailWag 2.4s ease-in-out infinite; }
-        @keyframes tailWag {
-            0%, 100% { transform: rotate(-3deg); }
-            50% { transform: rotate(5deg); }
-        }
-        .fox-eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s ease-in-out infinite; }
-        @keyframes blink {
-            0%, 92%, 100% { transform: scaleY(1); }
-            96% { transform: scaleY(0.12); }
-        }
-        .mouth-happy { opacity: 0; transition: opacity 0.2s ease; }
-        .mouth-idle { transition: opacity 0.2s ease; }
-        .pet-avatar-wrap.happy .mouth-happy { opacity: 1; }
-        .pet-avatar-wrap.happy .mouth-idle { opacity: 0; }
-        .pet-avatar-wrap.happy { animation: float 2.6s ease-in-out infinite, jump 0.5s ease; }
-        .pet-avatar-wrap.happy .fox-tail { animation: tailWag 0.35s ease-in-out infinite; }
-
-        @keyframes jump {
-            0% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-10px) scale(1.15) rotate(-6deg); }
-            100% { transform: translateY(0) scale(1); }
-        }
-
-        .mood-badge {
-            position: absolute;
-            bottom: -3px;
-            right: -3px;
-            width: 22px;
-            height: 22px;
-            background: var(--card-dark);
-            border: 2px solid var(--gold);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.78rem;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-            transform: scale(0);
-            transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
-        }
-        .mood-badge.show { transform: scale(1); }
-
-        .pet-avatar-wrap[data-mood="agua"] { border-color: rgba(110,198,241,0.6); box-shadow: 0 0 18px rgba(110,198,241,0.4); }
-        .pet-avatar-wrap[data-mood="agua"] .mood-badge { border-color: #6ec6f1; }
-        .pet-avatar-wrap[data-mood="comida"] { border-color: rgba(95,184,122,0.6); box-shadow: 0 0 18px rgba(95,184,122,0.4); }
-        .pet-avatar-wrap[data-mood="comida"] .mood-badge { border-color: var(--primary); }
-        .pet-avatar-wrap[data-mood="entreno"] { border-color: rgba(255,154,107,0.6); box-shadow: 0 0 18px rgba(255,154,107,0.4); }
-        .pet-avatar-wrap[data-mood="entreno"] .mood-badge { border-color: #ff9a6b; }
-        .pet-avatar-wrap[data-mood="logro"] { border-color: rgba(255,206,84,0.75); box-shadow: 0 0 20px rgba(255,206,84,0.5); }
-        .pet-avatar-wrap[data-mood="perfecto"] { border-color: rgba(255,206,84,0.75); box-shadow: 0 0 20px rgba(255,206,84,0.5); }
-
-        .pet-speech {
-            font-size: 0.78rem;
-            font-weight: 700;
-            color: #fff;
-            line-height: 1.25;
-            text-align: left;
-            flex: 1;
-            position: relative;
-            background: rgba(0,0,0,0.18);
-            padding: 8px 12px;
-            border-radius: 14px;
-        }
-        .pet-speech::before {
-            content: "";
-            position: absolute;
-            left: -5px;
-            top: 14px;
-            width: 10px;
-            height: 10px;
-            background: rgba(0,0,0,0.18);
-            transform: rotate(45deg);
-            border-radius: 2px;
-        }
-        .pet-hint { font-size: 0.62rem; color: rgba(255,255,255,0.75); font-weight: 600; margin-top: 5px; margin-left: 12px; }
-
-        /* Pestañas */
-        .nav-tabs {
-            display: flex;
-            background: rgba(0,0,0,0.22);
-            padding: 5px;
-            gap: 3px;
-            margin: 12px 12px 0;
-            border-radius: 16px;
-            overflow-x: auto;
-        }
-        .tab-btn {
-            flex: 1;
-            background: transparent;
-            border: none;
-            padding: 8px 4px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            white-space: nowrap;
-        }
-        .tab-btn.active {
-            background: linear-gradient(135deg, var(--accent-warm), var(--pink));
-            color: white;
-            box-shadow: 0 4px 14px rgba(226, 87, 76, 0.35);
-        }
-
-        .app-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-        }
-        .tab-pane { display: none; }
-        .tab-pane.active { display: block; animation: fadeIn 0.3s ease; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card {
-            background: var(--card-dark);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            padding: 16px;
-            margin-bottom: 14px;
-            box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.03);
-        }
-        .card h3 { font-family: var(--font-display); color: var(--gold); font-size: 1rem; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; font-weight: 700; letter-spacing: 0.2px; }
-
-        .calories-badge {
-            background: rgba(242, 165, 65, 0.18);
-            color: var(--accent-warm);
-            font-size: 0.7rem;
-            padding: 3px 8px;
-            border-radius: 8px;
-            font-weight: 700;
-            border: 1px solid rgba(242, 165, 65, 0.4);
-        }
-
-        .meal-card {
-            background: var(--card-soft);
-            padding: 10px 12px;
-            border-radius: 14px;
-            margin-bottom: 8px;
-            border-left: 4px solid var(--accent);
-            font-size: 0.8rem;
-            color: #d9d0c2;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .meal-info strong { color: white; display: block; margin-bottom: 2px; font-family: var(--font-display); font-weight: 600; }
-        .meal-cal { font-size: 0.72rem; color: var(--accent-warm); font-weight: bold; background: var(--bg-darker); padding: 2px 6px; border-radius: 6px; white-space: nowrap; margin-left: 8px;}
-
-        /* Despensa Editable */
-        .pantry-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .pantry-item {
-            background: var(--card-soft);
-            border: 1px solid var(--line);
-            padding: 8px 10px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .pantry-item span:first-child { font-weight: bold; color: white; }
-        .pantry-minuta-info { font-size: 0.65rem; color: var(--accent-warm); margin-top: 2px; }
-        .pantry-minuta-info.muted { color: var(--text-muted); font-style: italic; }
-        .stock-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
-        .pantry-item span.stock { color: var(--primary); font-size: 0.75rem; font-weight: bold; }
-        .pantry-item.bajo { border-color: var(--danger); background: rgba(229, 72, 77, 0.1); }
-        .pantry-item.bajo span.stock { color: #f5a3a3; }
-
-        .btn-edit {
-            background: var(--line);
-            color: white;
-            border: none;
-            padding: 2px 7px;
-            border-radius: 7px;
-            font-size: 0.65rem;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-edit:hover { background: var(--accent-warm); color: #2b1400; }
-        .btn-edit-danger { background: rgba(229, 72, 77, 0.25); }
-        .btn-edit-danger:hover { background: var(--danger); color: white; }
-
-        /* Filtros Reporte */
-        .filter-box {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 12px;
-            align-items: center;
-        }
-        .filter-box select {
-            flex: 1;
-            background: var(--bg-darker);
-            border: 1px solid var(--line);
-            color: white;
-            padding: 7px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-        }
-
-        .history-item {
-            background: var(--card-soft);
-            border-left: 4px solid var(--primary);
-            padding: 10px 12px;
-            border-radius: 14px;
-            margin-bottom: 10px;
-            font-size: 0.78rem;
-            position: relative;
-        }
-        .history-item .date { font-weight: bold; color: var(--primary); margin-bottom: 6px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; font-family: var(--font-display); }
-        .history-meal-line { margin-top: 4px; color: #d9d0c2; line-height: 1.3; font-size: 0.75rem; }
-        .history-training { margin-top: 6px; color: #ff9a6b; font-weight: bold; }
-        .history-water { margin-top: 4px; color: #6ec6f1; font-weight: bold; }
-        .btn-delete-history {
-            background: rgba(229, 72, 77, 0.18);
-            color: #f5a3a3;
-            border: 1px solid rgba(229, 72, 77, 0.4);
-            padding: 3px 9px;
-            border-radius: 8px;
-            font-size: 0.65rem;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 8px;
-            float: right;
-        }
-        .btn-delete-history:hover { background: var(--danger); color: white; }
-
-        /* Modal de Reporte Interno */
-        #modal-reporte {
-            display: none;
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--card-dark);
-            z-index: 100;
-            padding: 16px;
-            overflow-y: auto;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 8px;
-            margin-bottom: 12px;
-        }
-        .modal-header h2 { font-size: 1.05rem; color: var(--gold); font-family: var(--font-display); }
-        .btn-close-modal {
-            background: var(--danger);
-            color: white;
-            border: none;
-            padding: 4px 10px;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 0.75rem;
-            cursor: pointer;
-        }
-        .reporte-contenido-caja {
-            background: var(--bg-darker);
-            padding: 12px;
-            border-radius: 14px;
-            font-size: 0.78rem;
-            margin-bottom: 12px;
-            border: 1px solid var(--line);
-        }
-
-        /* Formularios entrenamiento y metas */
-        .form-group { margin-bottom: 10px; }
-        .form-group label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
-        .form-control {
-            width: 100%;
-            background: var(--bg-darker);
-            border: 1px solid var(--line);
-            color: white;
-            padding: 9px 10px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-        }
-
-        /* Botones */
-        .btn-action {
-            background: linear-gradient(135deg, var(--primary), var(--primary-strong));
-            color: #05170f;
-            border: none;
-            padding: 11px 14px;
-            border-radius: 999px;
-            font-weight: 800;
-            font-size: 0.78rem;
-            width: 100%;
-            cursor: pointer;
-            box-shadow: 0 4px 12px var(--primary-glow);
-            margin-top: 8px;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-        .btn-action:active { transform: translateY(2px); box-shadow: 0 2px 6px var(--primary-glow); }
-        .btn-secondary {
-            background: linear-gradient(135deg, var(--accent), #603a22);
-            color: white;
-            border: none;
-            padding: 11px 14px;
-            border-radius: 999px;
-            font-weight: 800;
-            font-size: 0.78rem;
-            width: 100%;
-            cursor: pointer;
-            margin-top: 6px;
-            transition: transform 0.15s ease;
-        }
-        .btn-secondary:active { transform: translateY(2px); }
-        .btn-small {
-            background: linear-gradient(135deg, var(--accent-warm), var(--pink));
-            color: white;
-            border: none;
-            padding: 4px 10px;
-            border-radius: 999px;
-            font-size: 0.65rem;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-small.danger {
-            background: linear-gradient(135deg, var(--danger), #8f2a2e);
-        }
-        .header-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
-        .comidas-check-group { display: flex; flex-wrap: wrap; gap: 6px 10px; margin: 4px 0 8px; }
-        .comidas-check-group label { display: flex; align-items: center; gap: 4px; font-size: 0.72rem; color: var(--text-muted); cursor: pointer; }
-        .comidas-check-group input { accent-color: var(--primary); width: 14px; height: 14px; }
-
-        .progress-container {
-            background: var(--bg-darker);
-            border: 1px solid var(--line);
-            border-radius: 999px;
-            height: 10px;
-            width: 100%;
-            overflow: hidden;
-            margin: 8px 0;
-        }
-        .progress-fill {
-            background: linear-gradient(90deg, var(--accent-warm), var(--pink));
-            height: 100%;
-            width: 0%;
-            border-radius: 999px;
-            transition: width 0.4s ease;
-        }
-        .xp-fill { background: linear-gradient(90deg, var(--gold), var(--accent-warm)); }
-        .clearfix::after { content: ""; clear: both; display: table; }
-
-        /* Toast de notificación (reemplaza alert()) */
-        .toast {
-            position: absolute;
-            left: 50%;
-            bottom: 18px;
-            transform: translateX(-50%) translateY(20px);
-            background: var(--bg-darker);
-            border: 1px solid var(--gold);
-            color: var(--text-main);
-            padding: 10px 16px;
-            border-radius: 14px;
-            font-size: 0.78rem;
-            font-weight: 700;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.25s ease, transform 0.25s ease;
-            z-index: 300;
-            max-width: 85%;
-            text-align: center;
-        }
-        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-        .toast.danger { border-color: var(--danger); }
-
-        /* Modales de confirmación / edición (reemplazan confirm() y prompt()) */
-        .modal-overlay {
-            display: none;
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(9, 22, 19, 0.78);
-            backdrop-filter: blur(2px);
-            z-index: 250;
-            align-items: flex-end;
-            justify-content: center;
-        }
-        .modal-overlay.open { display: flex; }
-        .modal-box {
-            background: var(--card-dark);
-            border: 1px solid var(--line);
-            border-top-left-radius: 24px;
-            border-top-right-radius: 24px;
-            padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px));
-            width: 100%;
-            max-width: 440px;
-            animation: slideUp 0.25s ease;
-        }
-        @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .modal-box p.modal-msg { font-size: 0.85rem; color: var(--text-main); margin-bottom: 14px; line-height: 1.4; }
-        .modal-box label.modal-label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
-        .modal-actions { display: flex; gap: 8px; margin-top: 10px; }
-        .modal-actions button { margin-top: 0; }
-        .input-error { border-color: var(--danger) !important; }
-        .input-error-msg { color: #f5a3a3; font-size: 0.7rem; margin-top: 4px; min-height: 14px; }
-
-        /* Sistema de Logros / XP */
-        .xp-header { display: flex; align-items: center; gap: 12px; }
-        .xp-level-badge {
-            font-family: var(--font-display);
-            background: linear-gradient(135deg, var(--gold), var(--accent-warm));
-            color: #2b1400;
-            font-weight: 800;
-            font-size: 0.85rem;
-            padding: 8px 12px;
-            border-radius: 14px 14px 6px 6px;
-            text-align: center;
-            min-width: 54px;
-            box-shadow: 0 4px 10px rgba(255, 206, 84, 0.3);
-        }
-        .xp-bar-wrap { flex: 1; }
-
-        .logros-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 8px;
-        }
-        .logro-item {
-            background: var(--card-soft);
-            border: 1px solid var(--line);
-            border-radius: 16px;
-            padding: 12px 10px;
-            text-align: center;
-            transition: transform 0.2s;
-        }
-        .logro-item.unlocked {
-            border-color: var(--gold);
-            background: radial-gradient(160% 140% at 50% -20%, rgba(255,206,84,0.18), var(--card-soft) 60%);
-            box-shadow: 0 4px 14px rgba(255, 206, 84, 0.15);
-        }
-        .logro-item.locked { opacity: 0.45; filter: grayscale(0.6); }
-        .logro-icon {
-            font-size: 1.5rem;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 6px;
-            background: rgba(0,0,0,0.18);
-            border-radius: 50%;
-        }
-        .logro-title { font-size: 0.72rem; font-weight: 800; color: white; display: block; font-family: var(--font-display); }
-        .logro-desc { font-size: 0.63rem; color: var(--text-muted); display: block; margin-top: 2px; line-height: 1.25; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Nutricional y Despensa Inteligente</title>
+  <!-- Tailwind CSS para un diseño limpio y moderno -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
 
-<div class="phone-frame">
-    <!-- Header con Mascota Super Interactiva -->
-    <div class="app-header">
-        <div class="app-header-text">
-            <h1>🍂 NutriGenesis</h1>
-            <p>Control & Hábitos</p>
+  <!-- Header -->
+  <header class="bg-emerald-600 text-white shadow-md py-4 px-6 flex justify-between items-center">
+    <h1 class="text-xl font-bold flex items-center gap-2">🥗 NutriStock Asistente</h1>
+    <div id="fechaHoy" class="text-sm bg-emerald-700 px-3 py-1 rounded-full"></div>
+  </header>
+
+  <!-- Contenedor Principal -->
+  <main class="max-w-4xl w-full mx-auto p-4 flex-grow grid grid-cols-1 md:grid-cols-3 gap-6">
+    
+    <!-- Columna Izquierda: Mascota y Estado Rápido -->
+    <div class="flex flex-col gap-6">
+      <!-- Tarjeta de Mascota -->
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 text-center flex flex-col items-center">
+        <div id="mascotaEmoji" onclick="reaccionarMascota()" class="text-6xl cursor-pointer transition-transform hover:scale-110 active:scale-95 select-none mb-2">🐰</div>
+        <h3 id="mascotaNombre" class="font-bold text-lg text-slate-700">Bunny Nutri</h3>
+        <p id="mascotaMensaje" class="text-xs text-slate-500 mt-1 italic min-h-[32px]">"¡Hola! Registra tus comidas y mantén el stock al día."</p>
+        <div class="w-full bg-slate-100 rounded-full h-2.5 mt-4 overflow-hidden">
+          <div id="barraAnimo" class="bg-emerald-500 h-2.5 w-3/4 transition-all duration-500"></div>
         </div>
-        <div class="xp-pill" id="header-xp-pill">Nv. 1</div>
+        <span class="text-[10px] text-slate-400 mt-1">Ánimo de la mascota</span>
+      </div>
+
+      <!-- Pestañas de Navegación -->
+      <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-1">
+        <button onclick="cambiarPestana('stock')" id="btnTabStock" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition-colors bg-emerald-50 text-emerald-700">📦 Despensa y Stock</button>
+        <button onclick="cambiarPestana('registro')" id="btnTabRegistro" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-slate-600 hover:bg-slate-50">🍽️ Registrar Comida</button>
+        <button onclick="cambiarPestana('historial')" id="btnTabHistorial" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-slate-600 hover:bg-slate-50">📊 Historial y Reportes</button>
+      </div>
     </div>
 
-    <!-- Franja Hero: Mascota grande -->
-    <div class="mascot-hero" onclick="interactuarMascota()" title="¡Tócame para hablar!" role="button" tabindex="0" aria-label="Hablar con la mascota" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();interactuarMascota();}">
-        <div class="pet-avatar-wrap" id="pet-avatar-wrap">
-            <svg class="fox-mascot" id="pet-emoji" viewBox="0 0 100 100" role="img" aria-label="Kori, la mascota zorro">
-                <g class="fox-tail">
-                    <ellipse cx="80" cy="70" rx="13" ry="19" transform="rotate(-25 80 70)" fill="var(--accent-warm)"/>
-                    <ellipse cx="85" cy="83" rx="6.5" ry="8.5" transform="rotate(-25 85 83)" fill="var(--text-main)"/>
-                </g>
-                <g class="fox-ear fox-ear-left">
-                    <polygon points="20,36 31,6 41,38" fill="var(--accent-warm)"/>
-                    <polygon points="25,31 31,15 35,32" fill="var(--text-main)"/>
-                </g>
-                <g class="fox-ear fox-ear-right">
-                    <polygon points="80,36 69,6 59,38" fill="var(--accent-warm)"/>
-                    <polygon points="75,31 69,15 65,32" fill="var(--text-main)"/>
-                </g>
-                <ellipse cx="50" cy="56" rx="34" ry="30" fill="var(--accent-warm)"/>
-                <ellipse cx="50" cy="66" rx="20" ry="16" fill="var(--text-main)"/>
-                <circle cx="27" cy="60" r="5" fill="var(--pink)" opacity="0.45"/>
-                <circle cx="73" cy="60" r="5" fill="var(--pink)" opacity="0.45"/>
-                <g class="fox-eyes">
-                    <ellipse cx="38" cy="51" rx="5" ry="6.5" fill="#22150c"/>
-                    <ellipse cx="62" cy="51" rx="5" ry="6.5" fill="#22150c"/>
-                    <circle cx="40" cy="48" r="1.6" fill="#fff"/>
-                    <circle cx="64" cy="48" r="1.6" fill="#fff"/>
-                </g>
-                <ellipse cx="50" cy="65" rx="4" ry="3" fill="var(--accent)"/>
-                <path class="mouth-idle" d="M42,72 Q50,78 58,72" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
-                <path class="mouth-happy" d="M43,71 Q50,83 57,71 Q50,77 43,71 Z" fill="var(--accent)"/>
-            </svg>
-            <div class="mood-badge" id="mood-badge"></div>
-        </div>
-        <div>
-            <div class="pet-speech" id="pet-text">¡Hola! ¿Qué comemos hoy?</div>
-            <div class="pet-hint">Toca para hablar con Kori 👋</div>
-        </div>
-    </div>
-
-    <!-- Pestañas -->
-    <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('minuta', this)">Minuta 🎲</button>
-        <button class="tab-btn" onclick="switchTab('despensa', this)">Stock 📦</button>
-        <button class="tab-btn" onclick="switchTab('historial', this)">Historial 📅</button>
-        <button class="tab-btn" onclick="switchTab('metas', this)">Metas</button>
-        <button class="tab-btn" onclick="switchTab('logros', this)">Logros 🏆</button>
-    </div>
-
-    <div class="app-body">
-
-        <!-- MINUTA -->
-        <div id="minuta" class="tab-pane active">
-            <div class="card">
-                <h3>
-                    <span>🎲 Minuta del Día</span>
-                    <span id="total-calorias-dia" class="calories-badge">0 kcal</span>
-                </h3>
-                <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 8px;">Sorteo inteligente: prioriza productos con menos stock restante, evita repetir un mismo ingrediente en el día y varía respecto a los últimos días.</p>
-                <div id="contenedor-minuta"></div>
-                <button class="btn-action" onclick="registrarComidaHoy()">✓ Registrar Consumo y Calorías</button>
-                <button class="btn-secondary" style="margin-top:6px;" onclick="generarNuevaMinuta()">🔄 Rotar Menú</button>
-            </div>
-        </div>
-
-        <!-- DESPENSA -->
-        <div id="despensa" class="tab-pane">
-            <div class="card">
-                <h3>
-                    <span>📦 Inventario Quincenal</span>
-                    <span class="header-actions">
-                        <button class="btn-small" onclick="recargarQuincenaCompleta()">🛒 Recargar Todo</button>
-                        <button class="btn-small danger" onclick="restablecerDespensaPorDefecto()">♻️ Restablecer</button>
-                    </span>
-                </h3>
-                <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 8px;">Edita stock o haz recarga completa quincenal:</p>
-                <p style="font-size: 0.68rem; color: var(--text-muted); margin: -4px 0 8px;">♻️ <strong>Restablecer</strong> devuelve la despensa a la lista original de productos y cantidades: se eliminan los productos que hayas agregado y se pierden los cambios de stock, ración y calorías. Tu historial y tus logros no se tocan.</p>
-                
-                <p style="font-size: 0.75rem; color: var(--primary); font-weight: bold; margin: 6px 0;">🥩 Proteínas & Lácteos</p>
-                <div class="pantry-grid" id="grid-proteinas"></div>
-
-                <p style="font-size: 0.75rem; color: var(--primary); font-weight: bold; margin: 10px 0 6px;">🌾 Cereales & Despensa</p>
-                <div class="pantry-grid" id="grid-cereales"></div>
-
-                <p style="font-size: 0.75rem; color: var(--primary); font-weight: bold; margin: 10px 0 6px;">🥗 Frescos & Frutas</p>
-                <div class="pantry-grid" id="grid-frescos"></div>
-
-                <p style="font-size: 0.75rem; color: var(--primary); font-weight: bold; margin: 10px 0 6px;">🧺 Otros productos</p>
-                <div class="pantry-grid" id="grid-otros"></div>
-            </div>
-
-            <div class="card">
-                <h3><span>📥 Importar lista de supermercado</span></h3>
-                <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 8px;">Pega tu lista, un producto por línea, separando los datos con coma (,): <strong>Nombre, Categoría, Cantidad, Unidad</strong></p>
-                <p style="font-size: 0.68rem; color: var(--text-muted); margin: -4px 0 8px; font-style: italic;">Ej: Pechuga de pollo, proteinas, 1000, g<br>Ej: Palta hass, frescos, 5, unid</p>
-                <p style="font-size: 0.66rem; color: var(--text-muted); margin: -4px 0 8px;">Categorías válidas: proteinas, cereales, frescos, otros (si escribes algo distinto, se intenta reconocer o se asigna a "otros"). Si un producto ya existe en tu despensa (mismo nombre), su cantidad se suma al stock actual; si no existe, se crea como producto nuevo.</p>
-                <p style="font-size: 0.66rem; color: var(--text-muted); margin: -4px 0 8px;">🎯 Si reconocemos el producto (pollo, arroz, huevo, palta, atún, etc.) y la unidad que escribiste coincide con la esperada, completamos automáticamente su ración y calorías para que entre de inmediato al sorteo de la minuta. Si no, puedes configurarlas después con el botón 🎯 de cada producto.</p>
-                <div class="form-group">
-                    <textarea id="import-lista-texto" class="form-control" rows="5" style="resize: vertical; font-family: monospace;" placeholder="Pechuga de pollo, proteinas, 1000, g&#10;Avena, cereales, 800, g&#10;Palta hass, frescos, 5, unid"></textarea>
-                </div>
-                <button class="btn-action" onclick="importarListaSupermercado()">📥 Importar lista</button>
-            </div>
-
-            <div class="card">
-                <h3><span>➕ Agregar producto</span></h3>
-                <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 8px;">Agrega algo que no esté en la lista, eligiendo su categoría, cantidad y unidad de medida:</p>
-                <div class="form-group">
-                    <label>Nombre del producto</label>
-                    <input type="text" id="nuevo-stock-nombre" class="form-control" placeholder="Ej: Salsa de soya">
-                </div>
-                <div class="form-group">
-                    <label>Categoría</label>
-                    <select id="nuevo-stock-categoria" class="form-control">
-                        <option value="proteinas">🥩 Proteínas &amp; Lácteos</option>
-                        <option value="cereales">🌾 Cereales &amp; Despensa</option>
-                        <option value="frescos">🥗 Frescos &amp; Frutas</option>
-                        <option value="otros" selected>🧺 Otros productos</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Cantidad actual</label>
-                    <input type="number" id="nuevo-stock-cantidad" class="form-control" placeholder="Ej: 500" min="0" step="any">
-                </div>
-                <div class="form-group">
-                    <label>Unidad de medida</label>
-                    <input type="text" id="nuevo-stock-unidad" class="form-control" placeholder="Ej: g, ml, unid, paq, frasco">
-                </div>
-                <div class="form-group">
-                    <label>Ración típica que usarías en una comida (opcional)</label>
-                    <input type="number" id="nuevo-stock-racion" class="form-control" placeholder="Ej: 150 (en la misma unidad de arriba)" min="0" step="any">
-                </div>
-                <div class="form-group">
-                    <label>Calorías aprox. de esa ración (opcional)</label>
-                    <input type="number" id="nuevo-stock-calorias" class="form-control" placeholder="Ej: 250" min="0" step="any">
-                </div>
-                <div class="form-group">
-                    <label>¿En qué comidas puede salir sorteado? (opcional)</label>
-                    <div class="comidas-check-group" id="nuevo-stock-comidas">
-                        <label><input type="checkbox" value="desayuno">🌅 Desayuno</label>
-                        <label><input type="checkbox" value="colacion1">🍎 Colación 1</label>
-                        <label><input type="checkbox" value="almuerzo">🍽️ Almuerzo</label>
-                        <label><input type="checkbox" value="colacion2">☕ Colación 2</label>
-                        <label><input type="checkbox" value="cena">🌙 Cena</label>
-                    </div>
-                    <p style="font-size: 0.66rem; color: var(--text-muted); margin: -4px 0 8px;">Si no marcas ninguna, se asigna automáticamente según la categoría (ej: proteínas solo en almuerzo/cena).</p>
-                </div>
-                <p style="font-size: 0.68rem; color: var(--text-muted); margin: -4px 0 8px;">Si completas ración y calorías, este producto podrá salir sorteado automáticamente en la Minuta del Día 🎲</p>
-                <button class="btn-action" onclick="agregarProductoPersonalizado()">Agregar a la despensa</button>
-            </div>
-        </div>
-
-        <!-- HISTORIAL & REPORTE NUTRI -->
-        <div id="historial" class="tab-pane">
-            <div class="card">
-                <h3>📅 Registro y Reporte</h3>
-                
-                <div class="filter-box">
-                    <select id="filtro-periodo" onchange="renderizarHistorial()">
-                        <option value="todos">📜 Todo el historial</option>
-                        <option value="7">⚡ Últimos 7 días</option>
-                        <option value="15">📆 Últimos 15 días</option>
-                        <option value="30">🗓️ Último mes (30 días)</option>
-                    </select>
-                </div>
-                
-                <button class="btn-action" style="margin-bottom: 8px; background: var(--accent); color: white;" onclick="abrirReporteNutri()">📄 Ver Reporte Interno</button>
-                <button class="btn-action" style="margin-bottom: 12px; background: #25d366; color: white;" onclick="enviarReporteCompartir()">📤 Enviar por WhatsApp / Correo</button>
-
-                <div id="contenedor-historial">
-                    <p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; padding: 20px;">Aún no hay registros guardados.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- METAS -->
-        <div id="metas" class="tab-pane">
-            <div class="card">
-                <h3>💧 Control de Agua</h3>
-                <p style="font-size: 0.8rem;">Consumido: <strong id="agua-val">0</strong> ml / 2000 ml</p>
-                <div class="progress-container">
-                    <div id="agua-bar" class="progress-fill"></div>
-                </div>
-                <button class="btn-action" onclick="sumarAgua()">+ 250 ml de Agua</button>
-            </div>
-            
-            <div class="card">
-                <h3>🏋️ Registrar Entrenamiento</h3>
-                <div class="form-group">
-                    <label>Tipo de Ejercicio:</label>
-                    <select id="tipo-ejercicio" class="form-control">
-                        <option value="🚴 Bicicleta">🚴 Bicicleta</option>
-                        <option value="🚶 Caminar">🚶 Caminar</option>
-                        <option value="🏋️ Pesas">🏋️ Pesas</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Duración (minutos):</label>
-                    <input type="number" id="minutos-ejercicio" class="form-control" value="45" min="5" max="300">
-                </div>
-                <button class="btn-secondary" onclick="registrarEntrenamientoHoy()">Guardar Entrenamiento ✓</button>
-                <p id="ejercicio-msg" style="font-size: 0.78rem; color: var(--primary); margin-top: 6px; text-align: center; font-weight: bold;"></p>
-            </div>
-        </div>
-
-        <!-- LOGROS -->
-        <div id="logros" class="tab-pane">
-            <div class="card">
-                <h3>🏆 Nivel y Progreso</h3>
-                <div class="xp-header">
-                    <div class="xp-level-badge" id="xp-level-badge">Nv. 1</div>
-                    <div class="xp-bar-wrap">
-                        <div class="progress-container"><div id="xp-bar" class="progress-fill xp-fill"></div></div>
-                        <p id="xp-text" style="font-size: 0.68rem; color: var(--text-muted); margin-top: 4px;">0 / 150 XP</p>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <h3>🎖️ Insignias</h3>
-                <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px;">Se desbloquean solas según tus hábitos registrados.</p>
-                <div id="grid-logros" class="logros-grid"></div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- PANTALLA MODAL DE REPORTE INTERNO -->
-    <div id="modal-reporte">
-        <div class="modal-header">
-            <h2>📋 Reporte Nutricional</h2>
-            <button class="btn-close-modal" onclick="cerrarReporteNutri()">✕ Cerrar</button>
-        </div>
-        <p style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 10px;">Paciente: Genesis Cortez | <span id="reporte-periodo-lbl"></span></p>
-        <div id="cuerpo-reporte-modal"></div>
-    </div>
-
-    <!-- Toast de notificaciones -->
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
-
-    <!-- Modal de confirmación genérico -->
-    <div id="modal-confirm" class="modal-overlay">
-        <div class="modal-box">
-            <p id="modal-confirm-text" class="modal-msg"></p>
-            <div class="modal-actions">
-                <button class="btn-secondary" id="modal-confirm-cancel" style="background:#374151;">Cancelar</button>
-                <button class="btn-action" id="modal-confirm-ok">Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de edición de stock -->
-    <div id="modal-prompt" class="modal-overlay">
-        <div class="modal-box">
-            <label class="modal-label" id="modal-prompt-label">Nueva cantidad:</label>
-            <input type="number" id="modal-prompt-input" class="form-control" min="0" inputmode="decimal">
-            <p class="input-error-msg" id="modal-prompt-error"></p>
-            <div class="modal-actions">
-                <button class="btn-secondary" id="modal-prompt-cancel" style="background:#374151;">Cancelar</button>
-                <button class="btn-action" id="modal-prompt-ok">Guardar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de edición de ración/calorías (para la Minuta automática) -->
-    <div id="modal-racion" class="modal-overlay">
-        <div class="modal-box">
-            <label class="modal-label" id="modal-racion-label">Datos para la minuta automática:</label>
-            <div class="form-group">
-                <label>Ración típica (misma unidad del producto)</label>
-                <input type="number" id="modal-racion-input" class="form-control" min="0" step="any" inputmode="decimal">
-            </div>
-            <div class="form-group">
-                <label>Calorías aprox. de esa ración</label>
-                <input type="number" id="modal-calorias-input" class="form-control" min="0" step="any" inputmode="decimal">
-            </div>
-            <div class="form-group">
-                <label>¿En qué comidas puede salir sorteado?</label>
-                <div class="comidas-check-group" id="modal-racion-comidas">
-                    <label><input type="checkbox" value="desayuno">🌅 Desayuno</label>
-                    <label><input type="checkbox" value="colacion1">🍎 Colación 1</label>
-                    <label><input type="checkbox" value="almuerzo">🍽️ Almuerzo</label>
-                    <label><input type="checkbox" value="colacion2">☕ Colación 2</label>
-                    <label><input type="checkbox" value="cena">🌙 Cena</label>
-                </div>
-                <p style="font-size:0.66rem; color:var(--text-muted); margin:-4px 0 4px;">Sin marcar ninguna: se usa el criterio automático según la categoría del producto.</p>
-            </div>
-            <p style="font-size:0.68rem; color:var(--text-muted); margin:-4px 0 4px;">Deja ración y calorías en blanco o en 0 para que este producto no participe en el sorteo automático de comidas.</p>
-            <p class="input-error-msg" id="modal-racion-error"></p>
-            <div class="modal-actions">
-                <button class="btn-secondary" id="modal-racion-cancel" style="background:#374151;">Cancelar</button>
-                <button class="btn-action" id="modal-racion-ok">Guardar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    // Definición de categorías disponibles para el stock (id -> etiqueta con ícono)
-    const categoriasDespensa = [
-        { id: 'proteinas', label: '🥩 Proteínas & Lácteos' },
-        { id: 'cereales', label: '🌾 Cereales & Despensa' },
-        { id: 'frescos', label: '🥗 Frescos & Frutas' },
-        { id: 'otros', label: '🧺 Otros productos' }
-    ];
-
-    // Despensa de fábrica: se usa al abrir la app por primera vez y al pulsar "Restablecer"
-    const DESPENSA_POR_DEFECTO = {
-        k1_pechuga_de_pollo: { nombre: "Pechuga de pollo", stock: 850, max: 850, unidad: "gr", categoria: "proteinas", racion: 150, calorias: 248, comidas: ["almuerzo", "cena"] },
-        k2_avena: { nombre: "Avena", stock: 550, max: 550, unidad: "gr", categoria: "cereales", racion: 50, calorias: 190, comidas: ["desayuno"] },
-        k3_palta_hass: { nombre: "Palta hass", stock: 5, max: 5, unidad: "unid", categoria: "frescos", racion: 0.5, calorias: 120, comidas: ["desayuno", "colacion1", "almuerzo"] },
-        k4_chia: { nombre: "Chía", stock: 250, max: 250, unidad: "gr", categoria: "cereales", racion: 15, calorias: 70, comidas: ["desayuno", "colacion2"] },
-        k5_salsa_de_tomate: { nombre: "Salsa de tomate", stock: 4, max: 4, unidad: "unid", categoria: "cereales" },
-        k6_leche_descremada: { nombre: "Leche descremada", stock: 4, max: 4, unidad: "litros", categoria: "proteinas", racion: 0.2, calorias: 70, comidas: ["desayuno", "colacion1", "colacion2"] },
-        k7_atun_lomitos: { nombre: "Atún Lomitos", stock: 4, max: 4, unidad: "latas", categoria: "proteinas", racion: 1, calorias: 120, comidas: ["almuerzo", "cena"] },
-        k8_jalea_sin_azucar: { nombre: "Jalea sin azúcar", stock: 4, max: 4, unidad: "unid", categoria: "cereales" },
-        k9_chocolate_cacao: { nombre: "Chocolate cacao", stock: 1, max: 1, unidad: "barra", categoria: "proteinas" },
-        k10_mantequilla_de_mani: { nombre: "Mantequilla de maní", stock: 510, max: 510, unidad: "gr", categoria: "cereales" },
-        k11_almendras: { nombre: "Almendras", stock: 80, max: 80, unidad: "gr", categoria: "cereales", racion: 30, calorias: 175, comidas: ["colacion1", "colacion2"] },
-        k12_papas: { nombre: "Papas", stock: 3, max: 3, unidad: "unid", categoria: "frescos" },
-        k13_tomates_cherry: { nombre: "Tomates cherry", stock: 250, max: 250, unidad: "gr", categoria: "frescos", racion: 100, calorias: 20, comidas: ["colacion1", "almuerzo", "cena"] },
-        k14_lechuga: { nombre: "Lechuga", stock: 1, max: 1, unidad: "unid", categoria: "frescos", racion: 0.2, calorias: 10, comidas: ["almuerzo", "cena"] },
-        k15_platanos: { nombre: "Plátanos", stock: 3, max: 3, unidad: "unid", categoria: "frescos", racion: 1, calorias: 90, comidas: ["desayuno", "colacion1", "colacion2"] },
-        k16_cibulette: { nombre: "Cibulette", stock: 1, max: 1, unidad: "paq", categoria: "frescos" },
-        k17_pera: { nombre: "Pera", stock: 3, max: 3, unidad: "unid", categoria: "frescos", racion: 1, calorias: 80, comidas: ["colacion1", "colacion2"] },
-        k18_manzanas: { nombre: "Manzanas", stock: 3, max: 3, unidad: "unid", categoria: "frescos", racion: 1, calorias: 80, comidas: ["colacion1", "colacion2"] },
-        k19_galletas_de_arroz: { nombre: "Galletas de arroz", stock: 13, max: 13, unidad: "unid", categoria: "cereales" },
-        k20_pan_integral_protein: { nombre: "Pan integral protein", stock: 13, max: 13, unidad: "unid", categoria: "cereales" },
-        k21_quesillo: { nombre: "Quesillo", stock: 2, max: 2, unidad: "unid", categoria: "proteinas", racion: 0.5, calorias: 90, comidas: ["desayuno", "colacion1", "colacion2"] },
-        k22_yoghurt_protein: { nombre: "Yoghurt protein", stock: 5, max: 5, unidad: "unid", categoria: "proteinas", racion: 1, calorias: 100, comidas: ["desayuno", "colacion1", "colacion2"] },
-        k23_carne_de_vacuno: { nombre: "Carne de vacuno", stock: 250, max: 250, unidad: "gr", categoria: "proteinas", racion: 150, calorias: 280, comidas: ["almuerzo", "cena"] },
-        k24_huevos: { nombre: "Huevos", stock: 12, max: 12, unidad: "unid", categoria: "proteinas", racion: 1, calorias: 70, comidas: ["desayuno", "almuerzo", "cena"] },
-        k25_fideos: { nombre: "Fideos", stock: 2, max: 2, unidad: "kilos", categoria: "cereales", racion: 0.1, calorias: 150, comidas: ["almuerzo", "cena"] },
-        k26_arroz: { nombre: "Arroz", stock: 2, max: 2, unidad: "kilos", categoria: "cereales", racion: 0.1, calorias: 130, comidas: ["almuerzo", "cena"] }
-    };
-
-    // Copia profunda para que editar el stock nunca modifique la plantilla original
-    function clonarDespensaPorDefecto() {
-        return JSON.parse(JSON.stringify(DESPENSA_POR_DEFECTO));
-    }
-
-    let despensa = JSON.parse(localStorage.getItem('nutri_despensa')) || clonarDespensaPorDefecto();
-
-    // A los ítems guardados antes de esta actualización les puede faltar "categoria"
-    for (let k in despensa) {
-        if (!despensa[k].categoria) despensa[k].categoria = 'otros';
-    }
-
-    let historialDias = JSON.parse(localStorage.getItem('nutri_historial')) || {}; 
-    let minutaActual = {};
-
-    function guardarDatosEnLocal() {
-        try {
-            localStorage.setItem('nutri_despensa', JSON.stringify(despensa));
-            localStorage.setItem('nutri_historial', JSON.stringify(historialDias));
-        } catch (e) {
-            mostrarToast('⚠️ No se pudo guardar el progreso en este dispositivo.', 3500, true);
-        }
-    }
-
-    // --- Reemplazos de alert() / confirm() / prompt() con estilo propio ---
-
-    function mostrarToast(mensaje, duracion = 2600, esError = false) {
-        const t = document.getElementById('toast');
-        t.innerText = mensaje;
-        t.classList.toggle('danger', esError);
-        t.classList.add('show');
-        clearTimeout(t._timer);
-        t._timer = setTimeout(() => t.classList.remove('show'), duracion);
-    }
-
-    function mostrarConfirm(texto) {
-        return new Promise(resolve => {
-            const modal = document.getElementById('modal-confirm');
-            document.getElementById('modal-confirm-text').innerText = texto;
-            const btnOk = document.getElementById('modal-confirm-ok');
-            const btnCancel = document.getElementById('modal-confirm-cancel');
-
-            function cerrar(resultado) {
-                modal.classList.remove('open');
-                btnOk.removeEventListener('click', onOk);
-                btnCancel.removeEventListener('click', onCancel);
-                resolve(resultado);
-            }
-            function onOk() { cerrar(true); }
-            function onCancel() { cerrar(false); }
-
-            btnOk.addEventListener('click', onOk);
-            btnCancel.addEventListener('click', onCancel);
-            modal.classList.add('open');
-        });
-    }
-
-    function mostrarPromptStock(nombreItem, valorActual, unidad) {
-        return new Promise(resolve => {
-            const modal = document.getElementById('modal-prompt');
-            const label = document.getElementById('modal-prompt-label');
-            const input = document.getElementById('modal-prompt-input');
-            const errorMsg = document.getElementById('modal-prompt-error');
-            const btnOk = document.getElementById('modal-prompt-ok');
-            const btnCancel = document.getElementById('modal-prompt-cancel');
-
-            label.innerText = `Nueva cantidad para ${nombreItem} (${unidad}):`;
-            input.value = valorActual;
-            input.classList.remove('input-error');
-            errorMsg.innerText = '';
-
-            function validarYCerrar() {
-                const valor = Number(input.value);
-                if (input.value.trim() === '' || isNaN(valor) || valor < 0) {
-                    input.classList.add('input-error');
-                    errorMsg.innerText = 'Ingresa un número válido de 0 o más.';
-                    return;
-                }
-                cerrar(valor);
-            }
-
-            function cerrar(resultado) {
-                modal.classList.remove('open');
-                btnOk.removeEventListener('click', validarYCerrar);
-                btnCancel.removeEventListener('click', onCancel);
-                input.removeEventListener('keydown', onKeyDown);
-                resolve(resultado);
-            }
-            function onCancel() { cerrar(null); }
-            function onKeyDown(e) {
-                if (e.key === 'Enter') validarYCerrar();
-                if (e.key === 'Escape') onCancel();
-            }
-
-            btnOk.addEventListener('click', validarYCerrar);
-            btnCancel.addEventListener('click', onCancel);
-            input.addEventListener('keydown', onKeyDown);
-            modal.classList.add('open');
-            setTimeout(() => input.focus(), 50);
-        });
-    }
-
-    // Ajusta el stock de un ítem de forma segura (por si el usuario ya lo eliminó de la despensa)
-    function ajustarStock(key, delta, decimales = 2) {
-        if (!despensa[key] || !delta) return;
-        let nuevo = despensa[key].stock + delta;
-        nuevo = Number(nuevo.toFixed(decimales));
-        despensa[key].stock = Math.max(0, nuevo);
-    }
-
-    function mostrarPromptRacion(item) {
-        return new Promise(resolve => {
-            const modal = document.getElementById('modal-racion');
-            const inputRacion = document.getElementById('modal-racion-input');
-            const inputCalorias = document.getElementById('modal-calorias-input');
-            const errorMsg = document.getElementById('modal-racion-error');
-            const btnOk = document.getElementById('modal-racion-ok');
-            const btnCancel = document.getElementById('modal-racion-cancel');
-            const comidasChecks = document.querySelectorAll('#modal-racion-comidas input[type=checkbox]');
-
-            document.getElementById('modal-racion-label').innerText = `Datos para la minuta automática — ${item.nombre} (${item.unidad}):`;
-            inputRacion.value = item.racion || '';
-            inputCalorias.value = item.calorias || '';
-            inputRacion.classList.remove('input-error');
-            inputCalorias.classList.remove('input-error');
-            errorMsg.innerText = '';
-            comidasChecks.forEach(chk => { chk.checked = !!(item.comidas && item.comidas.includes(chk.value)); });
-
-            function validarYCerrar() {
-                const racionTxt = inputRacion.value.trim();
-                const caloriasTxt = inputCalorias.value.trim();
-                const comidasSeleccionadas = Array.from(comidasChecks).filter(c => c.checked).map(c => c.value);
-
-                // Ambos vacíos (o en 0): el producto queda fuera del sorteo automático
-                if ((racionTxt === '' || Number(racionTxt) === 0) && (caloriasTxt === '' || Number(caloriasTxt) === 0)) {
-                    cerrar({ racion: null, calorias: null, comidas: comidasSeleccionadas });
-                    return;
-                }
-
-                const racion = Number(racionTxt);
-                const calorias = Number(caloriasTxt);
-                if (racionTxt === '' || isNaN(racion) || racion <= 0 || caloriasTxt === '' || isNaN(calorias) || calorias < 0) {
-                    inputRacion.classList.add('input-error');
-                    inputCalorias.classList.add('input-error');
-                    errorMsg.innerText = 'Completa ambos campos con números válidos, o déjalos vacíos.';
-                    return;
-                }
-                cerrar({ racion, calorias, comidas: comidasSeleccionadas });
-            }
-
-            function cerrar(resultado) {
-                modal.classList.remove('open');
-                btnOk.removeEventListener('click', validarYCerrar);
-                btnCancel.removeEventListener('click', onCancel);
-                resolve(resultado);
-            }
-            function onCancel() { cerrar(null); }
-
-            btnOk.addEventListener('click', validarYCerrar);
-            btnCancel.addEventListener('click', onCancel);
-            modal.classList.add('open');
-        });
-    }
-
-    function obtenerFechaHoyStr() {
-        // Formato ISO (YYYY-MM-DD): ordena bien alfabéticamente y se parsea sin ambigüedad.
-        const hoy = new Date();
-        const anio = hoy.getFullYear();
-        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-        const dia = String(hoy.getDate()).padStart(2, '0');
-        return `${anio}-${mes}-${dia}`;
-    }
-
-    function obtenerFechaLegible(fechaStr) {
-        if(!fechaStr.includes('-')) return fechaStr;
-        let p = fechaStr.split('-');
-        let d = new Date(p[0], p[1] - 1, p[2]);
-        return d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'short' });
-    }
-
-    function actualizarMascotaSegunEstado(tipoAccion = 'idle') {
-        const wrapEl = document.getElementById('pet-avatar-wrap');
-        const badgeEl = document.getElementById('mood-badge');
-        const textEl = document.getElementById('pet-text');
-
-        let mood = "idle";
-        let badge = "";
-        let mensaje = "¡Hola! ¿Qué comemos hoy?";
-
-        const fechaHoy = obtenerFechaHoyStr();
-        const agua = historialDias[fechaHoy]?.agua || 0;
-        const tieneMenu = historialDias[fechaHoy]?.desayuno;
-        const tieneEntreno = historialDias[fechaHoy]?.entrenamiento;
-
-        if (tipoAccion === 'agua') {
-            mood = "agua"; badge = "💧";
-            mensaje = agua >= 2000 ? "¡Meta de agua completa! 🌟" : "¡Glup glup! Sigue tomando agua 💧";
-        } else if (tipoAccion === 'comida') {
-            mood = "comida"; badge = "🥗";
-            mensaje = "¡Ñam! Alimento guardado y descontado 👏";
-        } else if (tipoAccion === 'entreno') {
-            mood = "entreno"; badge = "🔥";
-            mensaje = "¡Qué gran energía en tu entrenamiento! 🚀";
-        } else if (tipoAccion === 'logro') {
-            mood = "logro"; badge = "🏆";
-            mensaje = "¡Insignia nueva desbloqueada! Revisa Logros 🎉";
-        } else if (tipoAccion === 'tocado') {
-            const listaFrases = [
-                "¡Ja, me haces cosquillas! ✨",
-                "¿Revisamos el stock quincenal? 📦",
-                "¡Hoy será un día genial! 💖",
-                agua < 1000 ? "¡Tengo sed de agua, recuerda tomar! 💧" : "¡Estás cumpliendo todas tus metas! 🏆",
-                tieneMenu ? "¡Ya comiste rico hoy! 🍽️" : "¡No olvides registrar tu menú de hoy! 📝"
-            ];
-            mood = "tocado"; badge = "✨";
-            mensaje = listaFrases[Math.floor(Math.random() * listaFrases.length)];
-        } else {
-            if (agua >= 2000 && tieneMenu) {
-                mood = "perfecto"; badge = "🌟";
-                mensaje = "¡Día perfecto completado! Estoy orgulloso. 🥳";
-            } else if (tieneEntreno) {
-                mood = "entreno"; badge = "💪";
-                mensaje = "¡Imparable con el ejercicio! Sigue así.";
-            } else {
-                mood = "idle"; badge = "🥕";
-                mensaje = "¡Vamos a cumplir las metas de hoy! 💪";
-            }
-        }
-
-        textEl.innerText = mensaje;
-        wrapEl.dataset.mood = mood;
-        badgeEl.innerText = badge;
-        badgeEl.classList.toggle('show', badge !== "");
-        wrapEl.classList.remove('happy');
-        void wrapEl.offsetWidth;
-        wrapEl.classList.add('happy');
-    }
-
-    function interactuarMascota() {
-        actualizarMascotaSegunEstado('tocado');
-    }
-
-    function switchTab(paneId, btn) {
-        document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById(paneId).classList.add('active');
-        btn.classList.add('active');
-        if(paneId === 'despensa') renderizarDespensa();
-        if(paneId === 'historial') renderizarHistorial();
-        if(paneId === 'metas') actualizarUIAgua();
-        if(paneId === 'logros') renderizarLogros();
-    }
-
-    // --- Sistema de Nivel, XP y Logros ---
-
-    let statsExtra = JSON.parse(localStorage.getItem('nutri_stats')) || { recargas: 0, logrosVistos: [] };
-
-    function guardarStatsExtra() {
-        try { localStorage.setItem('nutri_stats', JSON.stringify(statsExtra)); } catch (e) { /* silencioso, no es crítico */ }
-    }
-
-    function calcularXP() {
-        let xp = 0;
-        Object.values(historialDias).forEach(dia => {
-            if (dia.desayuno) xp += 10;
-            if (dia.agua >= 2000) xp += 15;
-            if (dia.entrenamiento) xp += 10;
-            if (dia.desayuno && dia.agua >= 2000 && dia.entrenamiento) xp += 20; // bono día perfecto
-        });
-        xp += statsExtra.recargas * 5;
-        return xp;
-    }
-
-    function actualizarIndicadorNivel() {
-        const xp = calcularXP();
-        const xpPorNivel = 150;
-        const nivel = Math.floor(xp / xpPorNivel) + 1;
-        const xpEnNivel = xp % xpPorNivel;
-        const porcentaje = Math.min(100, (xpEnNivel / xpPorNivel) * 100);
-
-        document.getElementById('header-xp-pill').innerText = `Nv. ${nivel}`;
-        const badge = document.getElementById('xp-level-badge');
-        const bar = document.getElementById('xp-bar');
-        const texto = document.getElementById('xp-text');
-        if (badge) badge.innerText = `Nv. ${nivel}`;
-        if (bar) bar.style.width = porcentaje + '%';
-        if (texto) texto.innerText = `${xpEnNivel} / ${xpPorNivel} XP`;
-        return xp;
-    }
-
-    function obtenerDefinicionLogros() {
-        const dias = Object.values(historialDias);
-        const diasConMenu = dias.filter(d => d.desayuno).length;
-        const diasHidratados = dias.filter(d => d.agua >= 2000).length;
-        const diasEntreno = dias.filter(d => d.entrenamiento).length;
-        const diasPerfectos = dias.filter(d => d.desayuno && d.agua >= 2000 && d.entrenamiento).length;
-        const diasRegistrados = Object.keys(historialDias).length;
-
-        return [
-            { icon: '🥇', title: 'Primer paso', desc: 'Registra tu primera comida', unlocked: diasConMenu >= 1 },
-            { icon: '💧', title: 'Bien hidratado', desc: 'Cumple la meta de agua un día', unlocked: diasHidratados >= 1 },
-            { icon: '🏋️', title: 'En movimiento', desc: 'Registra 3 entrenamientos', unlocked: diasEntreno >= 3 },
-            { icon: '🌟', title: 'Día perfecto', desc: 'Comida + agua + entreno el mismo día', unlocked: diasPerfectos >= 1 },
-            { icon: '🔥', title: 'Constancia', desc: 'Registra menús 5 días distintos', unlocked: diasConMenu >= 5 },
-            { icon: '🛒', title: 'Buen abastecedor', desc: 'Recarga la despensa una vez', unlocked: statsExtra.recargas >= 1 },
-            { icon: '📅', title: 'Una semana activa', desc: 'Ten actividad en 7 días distintos', unlocked: diasRegistrados >= 7 },
-            { icon: '👑', title: 'Leyenda NutriGenesis', desc: 'Acumula 5 días perfectos', unlocked: diasPerfectos >= 5 }
-        ];
-    }
-
-    function renderizarLogros() {
-        actualizarIndicadorNivel();
-        const logros = obtenerDefinicionLogros();
-        const contenedor = document.getElementById('grid-logros');
-        contenedor.innerHTML = logros.map(l => `
-            <div class="logro-item ${l.unlocked ? 'unlocked' : 'locked'}">
-                <span class="logro-icon">${l.unlocked ? l.icon : '🔒'}</span>
-                <span class="logro-title">${l.title}</span>
-                <span class="logro-desc">${l.desc}</span>
-            </div>
-        `).join('');
-
-        // Avisar de insignias nuevas que el usuario aún no había visto
-        const nuevas = logros.filter(l => l.unlocked && !statsExtra.logrosVistos.includes(l.title));
-        if (nuevas.length > 0) {
-            statsExtra.logrosVistos = logros.filter(l => l.unlocked).map(l => l.title);
-            guardarStatsExtra();
-            mostrarToast(`🏆 ¡Insignia desbloqueada: ${nuevas[0].title}!`, 3200);
-        }
-    }
-
-    // Comidas del día para las que un producto puede salir sorteado
-    const comidasDisponibles = [
-        { id: 'desayuno',  label: '🌅 Desayuno' },
-        { id: 'colacion1', label: '🍎 Colación 1' },
-        { id: 'almuerzo',  label: '🍽️ Almuerzo' },
-        { id: 'colacion2', label: '☕ Colación 2' },
-        { id: 'cena',      label: '🌙 Cena' }
-    ];
-
-    // Si un producto no tiene "comidas" configuradas explícitamente (productos antiguos o
-    // importados), se usa este criterio por categoría para no mezclar, p.ej., carne en el desayuno.
-    function comidasPorDefectoSegunCategoria(categoria) {
-        switch (categoria) {
-            case 'proteinas': return ['almuerzo', 'cena'];
-            case 'cereales':  return ['desayuno', 'colacion2', 'almuerzo', 'cena'];
-            case 'frescos':   return ['colacion1', 'almuerzo', 'colacion2', 'cena'];
-            default:          return ['desayuno', 'colacion1', 'almuerzo', 'colacion2', 'cena'];
-        }
-    }
-
-    function comidasDelItem(item) {
-        return (item.comidas && item.comidas.length) ? item.comidas : comidasPorDefectoSegunCategoria(item.categoria);
-    }
-
-    // Plantillas de comidas: de qué categorías se puede tomar cada ingrediente
-    const plantillasMinuta = {
-        desayuno:  { icono: '🌅', label: 'Desayuno',   bloques: [ { categorias: ['proteinas'] }, { categorias: ['cereales'] } ] },
-        colacion1: { icono: '🍎', label: 'Colación 1', bloques: [ { categorias: ['frescos', 'proteinas'] } ] },
-        almuerzo:  { icono: '🍽️', label: 'Almuerzo',   bloques: [ { categorias: ['proteinas'] }, { categorias: ['cereales'] }, { categorias: ['frescos'] } ] },
-        colacion2: { icono: '☕', label: 'Colación 2', bloques: [ { categorias: ['cereales', 'frescos'] } ] },
-        cena:      { icono: '🌙', label: 'Cena',       bloques: [ { categorias: ['proteinas'] }, { categorias: ['cereales'] } ] }
-    };
-
-    // Ítems de una o más categorías que tienen ración/calorías configuradas, stock suficiente,
-    // y que además están habilitados para la comida ("slot") que se está armando.
-    function obtenerIngredientesDisponibles(categorias, excluirKeys, slot) {
-        return Object.keys(despensa).filter(k => {
-            const it = despensa[k];
-            return categorias.includes(it.categoria)
-                && it.racion > 0
-                && it.calorias !== undefined && it.calorias !== null
-                && it.stock >= it.racion
-                && !excluirKeys.includes(k)
-                && comidasDelItem(it).includes(slot);
-        });
-    }
-
-    // Sortea un ingrediente entre los candidatos, dando más probabilidad a los que tienen
-    // menos porciones restantes en stock, para rotarlos e ir usándolos antes de que se agoten o venzan.
-    function elegirIngredienteInteligente(candidatos) {
-        if (candidatos.length === 0) return null;
-        if (candidatos.length === 1) return candidatos[0];
-
-        const pesos = candidatos.map(key => {
-            const it = despensa[key];
-            const porcionesRestantes = Math.max(1, it.stock / it.racion);
-            return { key, peso: 1 / porcionesRestantes };
-        });
-        const totalPeso = pesos.reduce((acc, p) => acc + p.peso, 0);
-        let r = Math.random() * totalPeso;
-        for (const p of pesos) {
-            r -= p.peso;
-            if (r <= 0) return p.key;
-        }
-        return pesos[pesos.length - 1].key;
-    }
-
-    // Claves de ingredientes usados en los últimos "diasAtras" días registrados, para variar la minuta.
-    function obtenerIngredientesRecientes(diasAtras = 2) {
-        const dias = Object.keys(historialDias).sort().reverse().slice(0, diasAtras);
-        const keys = [];
-        dias.forEach(fecha => {
-            const usados = historialDias[fecha].itemsUsados;
-            if (usados) usados.forEach(u => { if (!keys.includes(u.key)) keys.push(u.key); });
-        });
-        return keys;
-    }
-
-    function armarComida(bloques, usadosGlobalHoy, evitarRecientes, slot) {
-        const items = [];
-        bloques.forEach(bloque => {
-            const usadosLocales = items.map(i => i.key);
-            const excluir = usadosGlobalHoy.concat(usadosLocales);
-
-            // Primero intenta evitar ingredientes usados en días recientes (variedad);
-            // si no queda ninguna alternativa disponible, los vuelve a permitir.
-            let disponibles = obtenerIngredientesDisponibles(bloque.categorias, excluir.concat(evitarRecientes), slot);
-            if (disponibles.length === 0) {
-                disponibles = obtenerIngredientesDisponibles(bloque.categorias, excluir, slot);
-            }
-            if (disponibles.length === 0) return;
-
-            const key = elegirIngredienteInteligente(disponibles);
-            const it = despensa[key];
-            items.push({ key, nombre: it.nombre, racion: it.racion, unidad: it.unidad, calorias: it.calorias });
-            usadosGlobalHoy.push(key);
-        });
-        const cal = items.reduce((acc, i) => acc + i.calorias, 0);
-        const text = items.length
-            ? items.map(i => `${i.racion} ${i.unidad} ${i.nombre}`).join(' + ')
-            : '⚠️ Sin ingredientes suficientes (agrega ración/calorías a tus productos o recarga stock)';
-        return { items, cal, text };
-    }
-
-    function generarNuevaMinuta() {
-        minutaActual = {};
-        let totalCal = 0;
-        const usadosGlobalHoy = [];
-        const evitarRecientes = obtenerIngredientesRecientes(2);
-
-        const html = Object.keys(plantillasMinuta).map(slot => {
-            const plantilla = plantillasMinuta[slot];
-            const comida = armarComida(plantilla.bloques, usadosGlobalHoy, evitarRecientes, slot);
-            minutaActual[slot] = comida;
-            totalCal += comida.cal;
-            return `
-                <div class="meal-card">
-                    <div class="meal-info"><strong>${plantilla.icono} ${plantilla.label}</strong>• ${comida.text}</div>
-                    <div class="meal-cal">+${comida.cal} kcal</div>
-                </div>
-            `;
-        }).join('');
-
-        document.getElementById('total-calorias-dia').innerText = `${totalCal} kcal`;
-        document.getElementById('contenedor-minuta').innerHTML = html;
-    }
-
-    function asegurarRegistroHoy(fecha) {
-        if (!historialDias[fecha]) {
-            historialDias[fecha] = { calorias: 0, desayuno: null, colacion1: null, almuerzo: null, colacion2: null, cena: null, itemsUsados: null, entrenamiento: null, agua: 0 };
-        }
-    }
-
-    function actualizarUIAgua() {
-        const fechaHoy = obtenerFechaHoyStr();
-        asegurarRegistroHoy(fechaHoy);
-        let aguaActual = historialDias[fechaHoy].agua || 0;
+    <!-- Columna Derecha: Contenido Dinámico según la pestaña -->
+    <div class="md:col-span-2 flex flex-col gap-6">
+
+      <!-- SECCIÓN 1: STOCK Y DESPENSA -->
+      <div id="seccionStock" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4">
+        <h2 class="text-lg font-bold text-slate-800 border-b pb-2">Gestión de Despensa e Insumos</h2>
         
-        document.getElementById('agua-val').innerText = aguaActual;
-        document.getElementById('agua-bar').style.width = (aguaActual / 2000) * 100 + '%';
-        guardarDatosEnLocal();
-    }
+        <!-- Formulario para Agregar Nuevo Ítem -->
+        <form onsubmit="agregarItemStock(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre del Ingrediente / Ítem</label>
+            <input type="text" id="nuevoNombre" placeholder="Ej. Avena, Pechuga de Pollo, Leche..." required class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Cantidad</label>
+            <input type="number" id="nuevaCantidad" step="any" placeholder="Ej. 1000" required class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Unidad</label>
+            <select id="nuevaUnidad" class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="g">Gramos (g)</option>
+              <option value="ml">Mililitros (ml)</option>
+              <option value="unidades">Unidades</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm transition-colors cursor-pointer">➕ Guardar Ítem en Despensa</button>
+          </div>
+        </form>
 
-    function sumarAgua() {
-        const fechaHoy = obtenerFechaHoyStr();
-        asegurarRegistroHoy(fechaHoy);
+        <!-- Lista de Stock Actual -->
+        <div>
+          <h3 class="text-sm font-bold text-slate-700 mb-2">Inventario Actual Disponible:</h3>
+          <div id="listaStock" class="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1">
+            <!-- Se llena por JS -->
+          </div>
+        </div>
+      </div>
 
-        let aguaActual = historialDias[fechaHoy].agua || 0;
-        if (aguaActual < 2000) {
-            aguaActual += 250;
-            historialDias[fechaHoy].agua = aguaActual;
-            actualizarUIAgua();
-            actualizarMascotaSegunEstado('agua');
-            actualizarIndicadorNivel();
-        } else {
-            mostrarToast('💧 ¡Meta de agua cumplida por hoy!');
-        }
-    }
-
-    function registrarComidaHoy() {
-        const fechaHoy = obtenerFechaHoyStr();
-        asegurarRegistroHoy(fechaHoy);
-
-        if (historialDias[fechaHoy].desayuno) {
-            mostrarToast('⚠️ Ya registraste un menú para hoy. Elimínalo en Historial si quieres cambiarlo.', 3200, true);
-            return;
-        }
-
-        const slots = Object.keys(plantillasMinuta);
-        let totalCal = 0;
-        let itemsUsados = [];
-
-        slots.forEach(slot => {
-            const comida = minutaActual[slot];
-            if (!comida) return;
-            totalCal += comida.cal;
-            comida.items.forEach(i => {
-                ajustarStock(i.key, -i.racion);
-                itemsUsados.push({ key: i.key, racion: i.racion });
-            });
-        });
-
-        historialDias[fechaHoy].calorias = totalCal;
-        historialDias[fechaHoy].desayuno = minutaActual.desayuno.text;
-        historialDias[fechaHoy].colacion1 = minutaActual.colacion1.text;
-        historialDias[fechaHoy].almuerzo = minutaActual.almuerzo.text;
-        historialDias[fechaHoy].colacion2 = minutaActual.colacion2.text;
-        historialDias[fechaHoy].cena = minutaActual.cena.text;
-        historialDias[fechaHoy].itemsUsados = itemsUsados;
-
-        guardarDatosEnLocal();
-        actualizarMascotaSegunEstado('comida');
-        actualizarIndicadorNivel();
-        mostrarToast(`✅ Consumo registrado: ${totalCal} kcal descontadas de la despensa.`);
-        generarNuevaMinuta();
-    }
-
-    function registrarEntrenamientoHoy() {
-        const fechaHoy = obtenerFechaHoyStr();
-        asegurarRegistroHoy(fechaHoy);
-
-        const tipo = document.getElementById('tipo-ejercicio').value;
-        const inputMinutos = document.getElementById('minutos-ejercicio');
-        let minutos = Number(inputMinutos.value);
-
-        if (isNaN(minutos) || inputMinutos.value.trim() === '') {
-            mostrarToast('⚠️ Ingresa una duración válida en minutos.', 2800, true);
-            return;
-        }
-        minutos = Math.min(300, Math.max(5, Math.round(minutos)));
-        inputMinutos.value = minutos;
-
-        historialDias[fechaHoy].entrenamiento = `${tipo} - ${minutos} minutos`;
-        guardarDatosEnLocal();
-        document.getElementById('ejercicio-msg').innerText = `🎉 ¡${tipo} de ${minutos} min guardado!`;
-        actualizarMascotaSegunEstado('entreno');
-        actualizarIndicadorNivel();
-    }
-
-    async function eliminarRegistroDia(fecha) {
-        const confirmado = await mostrarConfirm(`¿Eliminar el registro del día ${fecha}? Si tenías alimentos guardados, se devolverán al stock.`);
-        if (confirmado) {
-            let datos = historialDias[fecha];
-            let mensaje = '🗑️ Registro eliminado y stock devuelto correctamente.';
-
-            if (datos && datos.itemsUsados) {
-                datos.itemsUsados.forEach(u => ajustarStock(u.key, u.racion));
-            } else if (datos && datos.partesMenu) {
-                // Registro antiguo (de antes de esta actualización): no se puede devolver automáticamente.
-                mensaje = 'ℹ️ Registro eliminado. Es un registro antiguo, así que revisa manualmente tu stock si corresponde.';
-            }
-
-            delete historialDias[fecha];
-            guardarDatosEnLocal();
-            renderizarHistorial();
-            actualizarUIAgua();
-            actualizarMascotaSegunEstado('idle');
-            actualizarIndicadorNivel();
-            mostrarToast(mensaje);
-        }
-    }
-
-    async function editarStock(key) {
-        let item = despensa[key];
-        if (!item) { renderizarDespensa(); return; }
-        let nuevoValor = await mostrarPromptStock(item.nombre, item.stock, item.unidad);
-        if (nuevoValor !== null) {
-            item.stock = nuevoValor;
-            guardarDatosEnLocal();
-            renderizarDespensa();
-            mostrarToast(`📦 ${item.nombre}: stock actualizado a ${nuevoValor} ${item.unidad}.`);
-        }
-    }
-
-    async function recargarQuincenaCompleta() {
-        const confirmado = await mostrarConfirm('¿Deseas reponer toda la despensa con tus cantidades quincenales máximas?');
-        if (confirmado) {
-            for (let key in despensa) {
-                despensa[key].stock = despensa[key].max;
-            }
-            statsExtra.recargas += 1;
-            guardarStatsExtra();
-            guardarDatosEnLocal();
-            renderizarDespensa();
-            actualizarIndicadorNivel();
-            document.getElementById('pet-text').innerText = "¡Despensa al 100%! 🛒";
-            mostrarToast('🛒 ¡Despensa recargada al 100% para la nueva quincena!');
-        }
-    }
-
-    async function restablecerDespensaPorDefecto() {
-        const personalizados = Object.keys(despensa).filter(k => !(k in DESPENSA_POR_DEFECTO)).length;
-        const detalle = personalizados > 0
-            ? ` Se eliminarán ${personalizados} producto(s) que agregaste tú.`
-            : '';
-        const confirmado = await mostrarConfirm(
-            `¿Restablecer la despensa a los valores predeterminados?${detalle} Se perderán los cambios de stock, ración y calorías. Tu historial no se modifica.`
-        );
-        if (!confirmado) return;
-
-        despensa = clonarDespensaPorDefecto();
-        guardarDatosEnLocal();
-        renderizarDespensa();
-        generarNuevaMinuta();
-        actualizarIndicadorNivel();
-        document.getElementById('pet-text').innerText = "Despensa como el primer día ♻️";
-        mostrarToast('♻️ Despensa restablecida a los valores predeterminados.');
-    }
-
-    function renderizarDespensa() {
-        categoriasDespensa.forEach(cat => {
-            const claves = Object.keys(despensa).filter(k => (despensa[k].categoria || 'otros') === cat.id);
-            const contenedor = document.getElementById('grid-' + cat.id);
-            if (!contenedor) return;
-            contenedor.innerHTML = claves.length
-                ? claves.map(k => crearItemHtml(k, despensa[k])).join('')
-                : '<p style="font-size:0.7rem;color:var(--text-muted);grid-column:1/-1;">No hay productos en esta categoría todavía.</p>';
-        });
-    }
-
-    function agregarProductoPersonalizado() {
-        const nombreInput = document.getElementById('nuevo-stock-nombre');
-        const cantidadInput = document.getElementById('nuevo-stock-cantidad');
-        const unidadInput = document.getElementById('nuevo-stock-unidad');
-        const categoriaInput = document.getElementById('nuevo-stock-categoria');
-        const racionInput = document.getElementById('nuevo-stock-racion');
-        const caloriasInput = document.getElementById('nuevo-stock-calorias');
-
-        const nombre = nombreInput.value.trim();
-        const cantidad = parseFloat(cantidadInput.value);
-        const unidad = unidadInput.value.trim();
-        const categoria = categoriaInput.value;
-        const racion = parseFloat(racionInput.value);
-        const calorias = parseFloat(caloriasInput.value);
-
-        if (!nombre) { mostrarToast('⚠️ Escribe un nombre para el producto.', 2600, true); return; }
-        if (!unidad) { mostrarToast('⚠️ Escribe una unidad de medida (g, ml, unid...).', 2600, true); return; }
-        if (isNaN(cantidad) || cantidad < 0) { mostrarToast('⚠️ Ingresa una cantidad válida.', 2600, true); return; }
-        if (racionInput.value.trim() !== '' && (isNaN(racion) || racion <= 0)) { mostrarToast('⚠️ La ración debe ser un número mayor a 0.', 2800, true); return; }
-        if (caloriasInput.value.trim() !== '' && (isNaN(calorias) || calorias < 0)) { mostrarToast('⚠️ Las calorías deben ser un número válido.', 2800, true); return; }
-
-        const key = 'custom_' + Date.now();
-        despensa[key] = { nombre, stock: cantidad, max: cantidad, unidad, categoria };
-        if (racionInput.value.trim() !== '' && caloriasInput.value.trim() !== '') {
-            despensa[key].racion = racion;
-            despensa[key].calorias = calorias;
-        }
-        const comidasSeleccionadas = Array.from(document.querySelectorAll('#nuevo-stock-comidas input[type=checkbox]:checked')).map(c => c.value);
-        if (comidasSeleccionadas.length) {
-            despensa[key].comidas = comidasSeleccionadas;
-        }
-        guardarDatosEnLocal();
-        renderizarDespensa();
-
-        nombreInput.value = '';
-        cantidadInput.value = '';
-        unidadInput.value = '';
-        racionInput.value = '';
-        caloriasInput.value = '';
-        document.querySelectorAll('#nuevo-stock-comidas input[type=checkbox]').forEach(c => c.checked = false);
-
-        mostrarToast(`📦 "${nombre}" agregado a tu despensa.`);
-    }
-
-    // --- Importación masiva de lista de supermercado ---
-
-    function detectarSeparadorLinea(linea) {
-        if (linea.includes('\t')) return '\t';
-        if (linea.includes(';')) return ';';
-        return ',';
-    }
-
-    function normalizarTexto(t) {
-        return (t || '').toString().trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    }
-
-    function normalizarCategoriaImport(txt) {
-        const t = normalizarTexto(txt);
-        if (!t) return 'otros';
-        if (categoriasDespensa.some(c => c.id === t)) return t;
-        if (t.includes('prote') || t.includes('lact')) return 'proteinas';
-        if (t.includes('cereal') || t.includes('desp') || t.includes('gran') || t.includes('pan') || t.includes('legum')) return 'cereales';
-        if (t.includes('fresc') || t.includes('frut') || t.includes('verdur') || t.includes('vegetal') || t.includes('vegg')) return 'frescos';
-        return 'otros';
-    }
-
-    function buscarKeyPorNombre(nombreNormalizado) {
-        return Object.keys(despensa).find(k => normalizarTexto(despensa[k].nombre) === nombreNormalizado);
-    }
-
-    // Base de calorías de alimentos comunes: ración típica, unidad esperada y calorías aprox. de esa ración.
-    // Se usa para autocompletar ración/calorías al importar, cuando reconocemos el producto y la unidad coincide.
-    const baseCaloricaComun = {
-        'pollo': { racion: 150, unidad: 'g', calorias: 248 },
-        'pechuga': { racion: 150, unidad: 'g', calorias: 248 },
-        'posta': { racion: 150, unidad: 'g', calorias: 300 },
-        'carne molida': { racion: 150, unidad: 'g', calorias: 280 },
-        'lomo': { racion: 150, unidad: 'g', calorias: 270 },
-        'cerdo': { racion: 150, unidad: 'g', calorias: 290 },
-        'pavo': { racion: 150, unidad: 'g', calorias: 200 },
-        'salmon': { racion: 150, unidad: 'g', calorias: 310 },
-        'atun': { racion: 1, unidad: 'latas', calorias: 120 },
-        'huevo': { racion: 1, unidad: 'unid', calorias: 70 },
-        'huevos': { racion: 1, unidad: 'unid', calorias: 70 },
-        'leche': { racion: 200, unidad: 'ml', calorias: 70 },
-        'yogur griego': { racion: 1, unidad: 'unid', calorias: 130 },
-        'yogurt': { racion: 1, unidad: 'unid', calorias: 100 },
-        'quesillo': { racion: 0.5, unidad: 'unid', calorias: 90 },
-        'queso': { racion: 30, unidad: 'g', calorias: 100 },
-        'jamon': { racion: 30, unidad: 'g', calorias: 60 },
-        'tofu': { racion: 100, unidad: 'g', calorias: 90 },
-        'camaron': { racion: 100, unidad: 'g', calorias: 100 },
-        'pan integral': { racion: 2, unidad: 'rej', calorias: 130 },
-        'pan': { racion: 2, unidad: 'rej', calorias: 140 },
-        'avena': { racion: 50, unidad: 'g', calorias: 190 },
-        'arroz': { racion: 100, unidad: 'g', calorias: 130 },
-        'fideos': { racion: 100, unidad: 'g', calorias: 150 },
-        'pasta': { racion: 100, unidad: 'g', calorias: 150 },
-        'quinoa': { racion: 100, unidad: 'g', calorias: 120 },
-        'lenteja': { racion: 100, unidad: 'g', calorias: 115 },
-        'lentejas': { racion: 100, unidad: 'g', calorias: 115 },
-        'garbanzo': { racion: 100, unidad: 'g', calorias: 160 },
-        'garbanzos': { racion: 100, unidad: 'g', calorias: 160 },
-        'poroto': { racion: 100, unidad: 'g', calorias: 130 },
-        'porotos': { racion: 100, unidad: 'g', calorias: 130 },
-        'galleta de arroz': { racion: 0.3, unidad: 'paq', calorias: 115 },
-        'mantequilla de mani': { racion: 0.1, unidad: 'frasco', calorias: 95 },
-        'almendra': { racion: 30, unidad: 'g', calorias: 175 },
-        'almendras': { racion: 30, unidad: 'g', calorias: 175 },
-        'nuez': { racion: 30, unidad: 'g', calorias: 190 },
-        'nueces': { racion: 30, unidad: 'g', calorias: 190 },
-        'semilla de chia': { racion: 15, unidad: 'g', calorias: 70 },
-        'miel': { racion: 15, unidad: 'g', calorias: 45 },
-        'cereal': { racion: 40, unidad: 'g', calorias: 150 },
-        'palta': { racion: 0.5, unidad: 'unid', calorias: 120 },
-        'lechuga': { racion: 0.2, unidad: 'unid', calorias: 10 },
-        'tomate': { racion: 100, unidad: 'g', calorias: 20 },
-        'zanahoria': { racion: 1, unidad: 'unid', calorias: 25 },
-        'papa': { racion: 150, unidad: 'g', calorias: 130 },
-        'papas': { racion: 150, unidad: 'g', calorias: 130 },
-        'manzana': { racion: 1, unidad: 'unid', calorias: 80 },
-        'pera': { racion: 1, unidad: 'unid', calorias: 80 },
-        'platano': { racion: 1, unidad: 'unid', calorias: 90 },
-        'naranja': { racion: 1, unidad: 'unid', calorias: 60 },
-        'pepino': { racion: 100, unidad: 'g', calorias: 15 },
-        'pimenton': { racion: 100, unidad: 'g', calorias: 30 },
-        'brocoli': { racion: 100, unidad: 'g', calorias: 35 },
-        'espinaca': { racion: 100, unidad: 'g', calorias: 23 },
-        'cebolla': { racion: 100, unidad: 'g', calorias: 40 },
-        'betarraga': { racion: 100, unidad: 'g', calorias: 43 },
-        'choclo': { racion: 100, unidad: 'g', calorias: 96 },
-        'kiwi': { racion: 1, unidad: 'unid', calorias: 45 },
-        'uva': { racion: 100, unidad: 'g', calorias: 70 },
-        'uvas': { racion: 100, unidad: 'g', calorias: 70 },
-        'sandia': { racion: 150, unidad: 'g', calorias: 45 },
-        'pina': { racion: 150, unidad: 'g', calorias: 75 },
-        'chia': { racion: 15, unidad: 'g', calorias: 70 },
-        'vacuno': { racion: 150, unidad: 'g', calorias: 280 },
-        'yoghurt': { racion: 1, unidad: 'unid', calorias: 100 },
-        'yogur': { racion: 1, unidad: 'unid', calorias: 100 },
-        'manzanas': { racion: 1, unidad: 'unid', calorias: 80 },
-        'peras': { racion: 1, unidad: 'unid', calorias: 80 },
-        'platanos': { racion: 1, unidad: 'unid', calorias: 90 },
-        'tomates': { racion: 100, unidad: 'g', calorias: 20 },
-        'pepinos': { racion: 100, unidad: 'g', calorias: 15 },
-        'zanahorias': { racion: 1, unidad: 'unid', calorias: 25 },
-        'cebollas': { racion: 100, unidad: 'g', calorias: 40 },
-        'kiwis': { racion: 1, unidad: 'unid', calorias: 45 },
-        'naranjas': { racion: 1, unidad: 'unid', calorias: 60 }
-    };
-
-    // Convierte variantes de unidad ("gr", "gramos", "und"...) a una forma estándar comparable.
-    function normalizarUnidad(u) {
-        const t = normalizarTexto(u);
-        if (['g', 'gr', 'grs', 'gramo', 'gramos'].includes(t)) return 'g';
-        if (['kg', 'kilo', 'kilos', 'kilogramo', 'kilogramos'].includes(t)) return 'kg';
-        if (['ml', 'mililitro', 'mililitros'].includes(t)) return 'ml';
-        if (['l', 'lt', 'litro', 'litros'].includes(t)) return 'l';
-        if (['unid', 'unidad', 'unidades', 'und', 'u'].includes(t)) return 'unid';
-        if (['lata', 'latas'].includes(t)) return 'latas';
-        if (['paq', 'paquete', 'paquetes'].includes(t)) return 'paq';
-        if (['frasco', 'frascos'].includes(t)) return 'frasco';
-        if (['rej', 'rebanada', 'rebanadas'].includes(t)) return 'rej';
-        return t;
-    }
-
-    // Unidades "grandes" que se pueden convertir a la unidad base en la que está la base de calorías
-    // (ej: si el usuario compra en kg pero la ración de referencia está en g).
-    const conversionesUnidad = {
-        'kg': { base: 'g', factor: 0.001 },
-        'l': { base: 'ml', factor: 0.001 }
-    };
-
-    // Dado un alimento encontrado en la base de calorías y la unidad real del producto importado,
-    // calcula la ración/calorías a usar, convirtiendo la unidad si es necesario (kg<->g, l<->ml).
-    function obtenerRacionCaloricaConvertida(matchCalorico, unidadNorm) {
-        if (!matchCalorico) return null;
-        if (matchCalorico.unidad === unidadNorm) {
-            return { racion: matchCalorico.racion, calorias: matchCalorico.calorias };
-        }
-        const conv = conversionesUnidad[unidadNorm];
-        if (conv && conv.base === matchCalorico.unidad) {
-            const racionConvertida = Math.round(matchCalorico.racion * conv.factor * 10000) / 10000;
-            return { racion: racionConvertida, calorias: matchCalorico.calorias };
-        }
-        return null;
-    }
-
-    // Busca el alimento más específico de la base de calorías cuyo nombre aparezca como palabra(s)
-    // completa(s) dentro del nombre del producto importado (para evitar coincidencias falsas parciales).
-    function buscarEnBaseCalorica(nombreNormalizado) {
-        if (baseCaloricaComun[nombreNormalizado]) return baseCaloricaComun[nombreNormalizado];
-        let mejorClave = null, mejorLargo = 0;
-        for (const clave in baseCaloricaComun) {
-            const escapada = clave.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp('(^|\\s)' + escapada + '(\\s|$)');
-            if (regex.test(nombreNormalizado) && clave.length > mejorLargo) {
-                mejorClave = clave;
-                mejorLargo = clave.length;
-            }
-        }
-        return mejorClave ? baseCaloricaComun[mejorClave] : null;
-    }
-
-    function importarListaSupermercado() {
-        const textarea = document.getElementById('import-lista-texto');
-        const texto = textarea.value;
-        if (!texto || !texto.trim()) {
-            mostrarToast('⚠️ Pega tu lista antes de importar.', 2800, true);
-            return;
-        }
-
-        const lineas = texto.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
-        let nuevos = 0, actualizados = 0, errores = 0, conCalorias = 0, primeraLinea = true;
-
-        lineas.forEach(linea => {
-            const sep = detectarSeparadorLinea(linea);
-            const partes = linea.split(sep).map(p => p.trim().replace(/^["']|["']$/g, ''));
-
-            // Salta una posible fila de encabezado (Nombre, Categoría, Cantidad, Unidad)
-            if (primeraLinea) {
-                primeraLinea = false;
-                const posibleHeader = normalizarTexto(partes[0]);
-                if (['nombre', 'producto', 'item', 'articulo'].includes(posibleHeader)) return;
-            }
-
-            if (partes.length < 4) { errores++; return; }
-
-            const [nombreRaw, categoriaRaw, cantidadRaw, unidadRaw] = partes;
-            const nombre = (nombreRaw || '').trim();
-            const cantidad = parseFloat((cantidadRaw || '').replace(',', '.'));
-            const unidad = (unidadRaw || '').trim();
-            const categoria = normalizarCategoriaImport(categoriaRaw);
-
-            if (!nombre || !unidad || isNaN(cantidad) || cantidad < 0) { errores++; return; }
-
-            const nombreNorm = normalizarTexto(nombre);
-            const keyExistente = buscarKeyPorNombre(nombreNorm);
-            const unidadNorm = normalizarUnidad(unidad);
-            const matchCalorico = buscarEnBaseCalorica(nombreNorm);
-            const infoCalorica = obtenerRacionCaloricaConvertida(matchCalorico, unidadNorm);
-
-            if (keyExistente) {
-                despensa[keyExistente].stock = (despensa[keyExistente].stock || 0) + cantidad;
-                despensa[keyExistente].max = Math.max(despensa[keyExistente].max || 0, despensa[keyExistente].stock);
-                if (unidad) despensa[keyExistente].unidad = unidad;
-                // Solo autocompleta calorías si el producto todavía no tenía ración/calorías configuradas.
-                if (infoCalorica && !despensa[keyExistente].racion && !despensa[keyExistente].calorias) {
-                    despensa[keyExistente].racion = infoCalorica.racion;
-                    despensa[keyExistente].calorias = infoCalorica.calorias;
-                    conCalorias++;
-                }
-                actualizados++;
-            } else {
-                const key = 'custom_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
-                despensa[key] = { nombre, stock: cantidad, max: cantidad, unidad, categoria };
-                if (infoCalorica) {
-                    despensa[key].racion = infoCalorica.racion;
-                    despensa[key].calorias = infoCalorica.calorias;
-                    conCalorias++;
-                }
-                nuevos++;
-            }
-        });
-
-        if (nuevos === 0 && actualizados === 0) {
-            mostrarToast('⚠️ No se pudo interpretar ninguna línea. Revisa el formato: Nombre, Categoría, Cantidad, Unidad.', 4000, true);
-            return;
-        }
-
-        guardarDatosEnLocal();
-        renderizarDespensa();
-        textarea.value = '';
-
-        let msg = `📥 Importación lista: ${nuevos} nuevo(s), ${actualizados} actualizado(s)`;
-        if (conCalorias > 0) msg += `, ${conCalorias} con calorías autocompletadas 🎯`;
-        if (errores > 0) msg += `, ${errores} línea(s) con error de formato`;
-        mostrarToast(msg, 4200);
-    }
-
-    async function eliminarProductoPersonalizado(key) {
-        const item = despensa[key];
-        if (!item) return;
-        const confirmado = await mostrarConfirm(`¿Eliminar "${item.nombre}" de tu despensa? Esta acción no se puede deshacer.`);
-        if (confirmado) {
-            delete despensa[key];
-            guardarDatosEnLocal();
-            renderizarDespensa();
-            mostrarToast(`🗑️ "${item.nombre}" eliminado de la despensa.`);
-        }
-    }
-
-    async function editarRacion(key) {
-        const item = despensa[key];
-        if (!item) return;
-        const resultado = await mostrarPromptRacion(item);
-        if (resultado === null) return;
-        if (resultado.comidas && resultado.comidas.length) {
-            item.comidas = resultado.comidas;
-        } else {
-            delete item.comidas;
-        }
-        if (resultado.racion === null) {
-            delete item.racion;
-            delete item.calorias;
-            mostrarToast(`ℹ️ "${item.nombre}" ya no participa en el sorteo automático de comidas.`);
-        } else {
-            item.racion = resultado.racion;
-            item.calorias = resultado.calorias;
-            mostrarToast(`🎲 "${item.nombre}" ahora puede salir en la Minuta automática.`);
-        }
-        guardarDatosEnLocal();
-        renderizarDespensa();
-    }
-
-    function crearItemHtml(key, item) {
-        if (!item) return '';
-        let esBajo = item.stock <= 0;
-        let infoMinuta = (item.racion && item.calorias !== undefined)
-            ? `<span class="pantry-minuta-info">🎲 ${item.racion} ${item.unidad} ≈ ${item.calorias} kcal</span>`
-            : `<span class="pantry-minuta-info muted">Sin datos para minuta automática</span>`;
-        return `
-            <div class="pantry-item ${esBajo ? 'bajo' : ''}">
-                <span>${item.nombre}</span>
-                ${infoMinuta}
-                <div class="stock-row">
-                    <span class="stock">${item.stock} ${item.unidad}</span>
-                    <div style="display:flex; gap:4px;">
-                        <button class="btn-edit" onclick="editarStock('${key}')">Editar</button>
-                        <button class="btn-edit" onclick="editarRacion('${key}')" title="Configurar ración y calorías para la minuta">🎯</button>
-                        <button class="btn-edit btn-edit-danger" onclick="eliminarProductoPersonalizado('${key}')" title="Eliminar producto">🗑️</button>
-                    </div>
-                </div>
+      <!-- SECCIÓN 2: REGISTRAR COMIDA -->
+      <div id="seccionRegistro" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hidden flex-col gap-4">
+        <h2 class="text-lg font-bold text-slate-800 border-b pb-2">Registrar Consumo y Descontar Stock</h2>
+        
+        <form onsubmit="registrarConsumo(event)" class="flex flex-col gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Seleccionar Ingrediente del Stock</label>
+            <select id="selectIngrediente" class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+              <!-- Se llena dinámicamente con la despensa actual -->
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Cantidad Consumida</label>
+              <input type="number" id="cantidadConsumo" step="any" placeholder="Ej. 150" required class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
             </div>
-        `;
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Calorías Aprox. (kcal)</label>
+              <input type="number" id="caloriasConsumo" placeholder="Ej. 250" required class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+          </div>
+          <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg text-sm transition-colors cursor-pointer">🍽️ Registrar y Descontar de Despensa</button>
+        </form>
+      </div>
+
+      <!-- SECCIÓN 3: HISTORIAL Y REPORTES -->
+      <div id="seccionHistorial" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hidden flex-col gap-4">
+        <h2 class="text-lg font-bold text-slate-800 border-b pb-2">Historial de Consumo</h2>
+        <div id="listaHistorial" class="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1">
+          <!-- Se llena por JS -->
+        </div>
+        <button onclick="copiarReporte()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-medium py-2 rounded-lg transition-colors cursor-pointer">📋 Copiar Resumen al Portapapeles</button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Script Lógico y Sincronización LocalStorage -->
+  <script>
+    // Estado inicial por defecto o recuperado de localStorage
+    let stock = JSON.parse(localStorage.getItem('nutri_stock')) || [
+      { id: 1, nombre: 'Pechuga de Pollo', cantidad: 1000, unidad: 'g' },
+      { id: 2, nombre: 'Arroz', cantidad: 1500, unidad: 'g' },
+      { id: 3, nombre: 'Leche Descremada', cantidad: 1000, unidad: 'ml' }
+    ];
+
+    let historial = JSON.parse(localStorage.getItem('nutri_historial')) || [];
+
+    // Inicialización visual
+    document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    renderizarTodo();
+
+    // Cambiar de pestañas
+    function cambiarPestana(pestana) {
+      document.getElementById('seccionStock').classList.add('hidden');
+      document.getElementById('seccionRegistro').classList.add('hidden');
+      document.getElementById('seccionHistorial').classList.add('hidden');
+
+      document.getElementById('btnTabStock').className = "w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-slate-600 hover:bg-slate-50";
+      document.getElementById('btnTabRegistro').className = "w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-slate-600 hover:bg-slate-50";
+      document.getElementById('btnTabHistorial').className = "w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition-colors text-slate-600 hover:bg-slate-50";
+
+      if (pestana === 'stock') {
+        document.getElementById('seccionStock').classList.remove('hidden');
+        document.getElementById('btnTabStock').className = "w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition-colors bg-emerald-50 text-emerald-700";
+      } else if (pestana === 'registro') {
+        document.getElementById('seccionRegistro').classList.remove('hidden');
+        document.getElementById('btnTabRegistro').className = "w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition-colors bg-emerald-50 text-emerald-700";
+        actualizarSelectIngredientes();
+      } else if (pestana === 'historial') {
+        document.getElementById('seccionHistorial').classList.remove('hidden');
+        document.getElementById('btnTabHistorial').className = "w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition-colors bg-emerald-50 text-emerald-700";
+      }
     }
 
-    function filtrarFechas() {
-        let dias = Object.keys(historialDias).sort().reverse();
-        let filtroVal = document.getElementById('filtro-periodo').value;
-        if (filtroVal === 'todos') return dias;
+    // Agregar ítem a la despensa
+    function agregarItemStock(event) {
+      event.preventDefault();
+      const nombre = document.getElementById('nuevoNombre').value.trim();
+      const cantidad = parseFloat(document.getElementById('nuevaCantidad').value);
+      const unidad = document.getElementById('nuevaUnidad').value;
 
-        let diasLimite = parseInt(filtroVal);
-        let hoy = new Date();
-        let hoyMedianoche = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+      // Verificar si ya existe para sumar o crear nuevo
+      const existente = stock.find(item => item.nombre.toLowerCase() === nombre.toLowerCase());
+      if (existente) {
+        existente.cantidad += cantidad;
+      } else {
+        stock.push({ id: Date.now(), nombre, cantidad, unidad });
+      }
 
-        return dias.filter(fechaStr => {
-            let partes = fechaStr.split('-');
-            if(partes.length !== 3) return true;
-            let dRegistro = new Date(partes[0], partes[1] - 1, partes[2]);
-            let diferenciaDias = (hoyMedianoche - dRegistro) / (1000 * 60 * 60 * 24);
-            return diferenciaDias >= 0 && diferenciaDias < diasLimite;
+      guardarYActualizar();
+      event.target.reset();
+      actualizarMascota("¡Nuevo ingrediente agregado a la despensa con éxito! 🥕");
+    }
+
+    // Eliminar ítem del stock
+    function eliminarStock(id) {
+      stock = stock.filter(item => item.id !== id);
+      guardarYActualizar();
+    }
+
+    // Registrar Consumo y descontar stock automáticamente
+    function registrarConsumo(event) {
+      event.preventDefault();
+      const nombreItem = document.getElementById('selectIngrediente').value;
+      const cantidadUsada = parseFloat(document.getElementById('cantidadConsumo').value);
+      const calorias = parseFloat(document.getElementById('caloriasConsumo').value);
+
+      // Buscar en el stock
+      const itemStock = stock.find(i => i.nombre === nombreItem);
+      if (!itemStock) return alert('Selecciona un ingrediente válido.');
+
+      if (itemStock.cantidad < cantidadUsada) {
+        alert(`⚠️ Advertencia: No tienes suficiente stock de ${itemStock.nombre}. Disponible: ${itemStock.cantidad} ${itemStock.unidad}`);
+      }
+
+      // Descontar automáticamente
+      itemStock.cantidad = Math.max(0, itemStock.cantidad - cantidadUsada);
+
+      // Agregar al historial
+      historial.unshift({
+        fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        nombre: nombreItem,
+        cantidad: cantidadUsada,
+        unidad: itemStock.unidad,
+        calorias: calorias
+      });
+
+      guardarYActualizar();
+      event.target.reset();
+      actualizarMascota("¡Comida registrada y stock descontado correctamente! 🍽️✨");
+      cambiarPestana('historial');
+    }
+
+    // Renderizar vistas
+    function renderizarTodo() {
+      // 1. Renderizar Lista Stock
+      const contenedorStock = document.getElementById('listaStock');
+      contenedorStock.innerHTML = '';
+      if (stock.length === 0) {
+        contenedorStock.innerHTML = '<p class="text-xs text-slate-400 italic">No hay elementos en la despensa.</p>';
+      } else {
+        stock.forEach(item => {
+          contenedorStock.innerHTML += `
+            <div class="flex justify-between items-center p-3 bg-slate-50 border border-slate-100 rounded-xl text-sm">
+              <div>
+                <span class="font-semibold text-slate-700">${item.nombre}</span>
+                <span class="text-xs text-slate-500 ml-2">(${item.cantidad} ${item.unidad})</span>
+              </div>
+              <button onclick="eliminarStock(${item.id})" class="text-red-500 hover:text-red-700 text-xs font-medium cursor-pointer">Eliminar</button>
+            </div>
+          `;
         });
-    }
+      }
 
-    function renderizarHistorial() {
-        const contenedor = document.getElementById('contenedor-historial');
-        const fechasFiltradas = filtrarFechas();
-
-        if(fechasFiltradas.length === 0) {
-            contenedor.innerHTML = `<p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; padding: 20px;">No hay registros en el periodo seleccionado.</p>`;
-            return;
-        }
-
-        contenedor.innerHTML = fechasFiltradas.map(fecha => {
-            let datos = historialDias[fecha];
-            let fechaBonita = obtenerFechaLegible(fecha);
-            return `
-                <div class="history-item">
-                    <span class="date">
-                        <span>📅 ${fechaBonita}</span>
-                        ${datos.calorias > 0 ? `<span style="color:#34d399;">🔥 ${datos.calorias} kcal</span>` : ''}
-                    </span>
-                    ${datos.desayuno ? `
-                        <div class="history-meal-line"><strong>🌅 Desayuno:</strong> ${datos.desayuno}</div>
-                        <div class="history-meal-line"><strong>🍎 Colación 1:</strong> ${datos.colacion1}</div>
-                        <div class="history-meal-line"><strong>🍽️ Almuerzo:</strong> ${datos.almuerzo}</div>
-                        <div class="history-meal-line"><strong>☕ Colación 2:</strong> ${datos.colacion2}</div>
-                        <div class="history-meal-line"><strong>🌙 Cena:</strong> ${datos.cena}</div>
-                    ` : '<div class="history-meal-line" style="color:var(--text-muted);">Sin registro de menú</div>'}
-                    
-                    ${datos.entrenamiento ? `<div class="history-training">💪 ${datos.entrenamiento}</div>` : ''}
-                    ${datos.agua > 0 ? `<div class="history-water">💧 Agua: ${datos.agua} ml</div>` : ''}
-                    <div class="clearfix">
-                        <button class="btn-delete-history" onclick="eliminarRegistroDia('${fecha}')">Eliminar Registro ✖</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    function abrirReporteNutri() {
-        const fechasFiltradas = filtrarFechas();
-        if(fechasFiltradas.length === 0) {
-            mostrarToast('No hay registros en el periodo seleccionado para generar el reporte.', 3000, true);
-            return;
-        }
-
-        let filtroTxt = document.getElementById('filtro-periodo').selectedOptions[0].text;
-        document.getElementById('reporte-periodo-lbl').innerText = filtroTxt;
-
-        let htmlCard = '';
-        fechasFiltradas.forEach(fecha => {
-            let datos = historialDias[fecha];
-            let fechaBonita = obtenerFechaLegible(fecha);
-            htmlCard += `
-                <div class="reporte-contenido-caja">
-                    <div style="font-weight: bold; color: var(--primary); margin-bottom: 6px; display:flex; justify-content:space-between;">
-                        <span>📅 ${fechaBonita}</span>
-                        <span>🔥 ${datos.calorias || 0} kcal</span>
-                    </div>
-                    ${datos.desayuno ? `
-                        <div style="color: #d1d5db; margin-top:2px; font-size:0.75rem;"><strong>🌅 Desayuno:</strong> ${datos.desayuno}</div>
-                        <div style="color: #d1d5db; margin-top:2px; font-size:0.75rem;"><strong>🍎 Colación 1:</strong> ${datos.colacion1}</div>
-                        <div style="color: #d1d5db; margin-top:2px; font-size:0.75rem;"><strong>🍽️ Almuerzo:</strong> ${datos.almuerzo}</div>
-                        <div style="color: #d1d5db; margin-top:2px; font-size:0.75rem;"><strong>☕ Colación 2:</strong> ${datos.colacion2}</div>
-                        <div style="color: #d1d5db; margin-top:2px; font-size:0.75rem;"><strong>🌙 Cena:</strong> ${datos.cena}</div>
-                    ` : '<div style="color:var(--text-muted); font-size:0.75rem;">Sin registro de menú</div>'}
-                    <div style="color: #38bdf8; margin-top:4px; font-size:0.75rem;"><strong>💪 Entrenamiento:</strong> ${datos.entrenamiento || 'Sin registro'}</div>
-                    <div style="color: #60a5fa; margin-top:2px; font-size:0.75rem;"><strong>💧 Agua:</strong> ${datos.agua || 0} ml</div>
-                </div>
-            `;
+      // 2. Renderizar Historial
+      const contenedorHistorial = document.getElementById('listaHistorial');
+      contenedorHistorial.innerHTML = '';
+      if (historial.length === 0) {
+        contenedorHistorial.innerHTML = '<p class="text-xs text-slate-400 italic">No hay registros de consumo aún.</p>';
+      } else {
+        historial.forEach(h => {
+          contenedorHistorial.innerHTML += `
+            <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl text-sm flex justify-between items-center">
+              <div>
+                <p class="font-semibold text-slate-700">${h.nombre} (${h.cantidad} ${h.unidad})</p>
+                <span class="text-xs text-slate-400">${h.fecha} • 🔥 ${h.calorias} kcal</span>
+              </div>
+            </div>
+          `;
         });
-
-        document.getElementById('cuerpo-reporte-modal').innerHTML = htmlCard;
-        document.getElementById('modal-reporte').style.display = 'block';
+      }
     }
 
-    function cerrarReporteNutri() {
-        document.getElementById('modal-reporte').style.display = 'none';
+    function actualizarSelectIngredientes() {
+      const select = document.getElementById('selectIngrediente');
+      select.innerHTML = '';
+      stock.forEach(item => {
+        select.innerHTML += `<option value="${item.nombre}">${item.nombre} (Disponibles: ${item.cantidad} ${item.unidad})</option>`;
+      });
     }
 
-    function enviarReporteCompartir() {
-        const fechasFiltradas = filtrarFechas();
-        if(fechasFiltradas.length === 0) {
-            mostrarToast('No hay registros en el periodo seleccionado para enviar.', 3000, true);
-            return;
-        }
-
-        let filtroTxt = document.getElementById('filtro-periodo').selectedOptions[0].text;
-        let textoReporte = `📋 *REPORTE NUTRICIONAL* 📋\nPaciente: Genesis Cortez\nPeriodo: ${filtroTxt}\n\n`;
-
-        fechasFiltradas.forEach(fecha => {
-            let datos = historialDias[fecha];
-            let fechaBonita = obtenerFechaLegible(fecha);
-            textoReporte += `📅 *${fechaBonita}* (🔥 ${datos.calorias || 0} kcal)\n`;
-            if(datos.desayuno) {
-                textoReporte += `• 🌅 Desayuno: ${datos.desayuno}\n`;
-                textoReporte += `• 🍎 Colación 1: ${datos.colacion1}\n`;
-                textoReporte += `• 🍽️ Almuerzo: ${datos.almuerzo}\n`;
-                textoReporte += `• ☕ Colación 2: ${datos.colacion2}\n`;
-                textoReporte += `• 🌙 Cena: ${datos.cena}\n`;
-            } else {
-                textoReporte += `• Sin registro de menú\n`;
-            }
-            textoReporte += `💪 ${datos.entrenamiento || 'Sin entrenamiento'}\n`;
-            textoReporte += `💧 Agua: ${datos.agua || 0} ml\n\n`;
-        });
-
-        if (navigator.share) {
-            navigator.share({
-                title: 'Reporte Nutricional - NutriGenesis',
-                text: textoReporte,
-            }).catch((error) => console.log('Error al compartir', error));
-        } else {
-            navigator.clipboard.writeText(textoReporte).then(() => {
-                mostrarToast('📋 ¡Reporte copiado! Ya puedes pegarlo en WhatsApp o correo.');
-            }).catch(() => {
-                mostrarToast('⚠️ No se pudo copiar automáticamente. Copia el texto manualmente.', 3200, true);
-            });
-        }
+    function guardarYActualizar() {
+      localStorage.setItem('nutri_stock', JSON.stringify(stock));
+      localStorage.setItem('nutri_historial', JSON.stringify(historial));
+      renderizarTodo();
     }
 
-    window.onload = function() {
-        generarNuevaMinuta();
-        actualizarUIAgua();
-        actualizarMascotaSegunEstado('idle');
-        actualizarIndicadorNivel();
-    };
-</script>
+    // Mascota interactiva
+    const mensajesMascota = [
+      "¡Sigue así! Estás cumpliendo tus metas nutricionales.",
+      "Recuerda tomar suficiente agua durante el día 💧.",
+      "¡Tu despensa luce genial y ordenada!",
+      "¿Qué te parece cocinar algo rico hoy con lo que tienes?"
+    ];
 
+    function reaccionarMascota() {
+      const mensajeAleatorio = mensajesMascota[Math.floor(Math.random() * mensajesMascota.length)];
+      actualizarMascota(mensajeAleatorio);
+    }
+
+    function actualizarMascota(texto) {
+      document.getElementById('mascotaMensaje').textContent = `"${texto}"`;
+    }
+
+    function copiarReporte() {
+      let textoReporte = "📊 *Resumen Nutricional y Despensa* 🥗\n\n";
+      textoReporte += "*Consumos recientes:*\n";
+      historial.slice(0, 5).forEach(h => {
+        textoReporte += `- ${h.nombre}: ${h.cantidad} ${h.unidad} (${h.calorias} kcal)\n`;
+      });
+      navigator.clipboard.writeText(textoReporte);
+      alert('¡Resumen copiado al portapapeles!');
+    }
+  </script>
 </body>
 </html>
