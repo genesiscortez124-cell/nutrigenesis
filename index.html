@@ -860,25 +860,32 @@
     ];
 
     let despensa = JSON.parse(localStorage.getItem('nutri_despensa')) || {
-        pollo: { nombre: "Pechuga Pollo", stock: 1500, max: 1500, unidad: "g", categoria: "proteinas", racion: 150, calorias: 248 },
-        paleta: { nombre: "Posta Paleta", stock: 1000, max: 1000, unidad: "g", categoria: "proteinas", racion: 150, calorias: 300 },
-        atun: { nombre: "Atún Agua", stock: 6, max: 6, unidad: "latas", categoria: "proteinas", racion: 1, calorias: 120 },
-        huevos: { nombre: "Huevos", stock: 12, max: 12, unidad: "unid", categoria: "proteinas", racion: 1, calorias: 70 },
-        leche: { nombre: "Leche Zero%", stock: 4, max: 4, unidad: "litros", categoria: "proteinas", racion: 0.2, calorias: 70 },
-        yogurt: { nombre: "Yogurt Protein", stock: 8, max: 8, unidad: "unid", categoria: "proteinas", racion: 1, calorias: 100 },
-        quesillo: { nombre: "Quesillo", stock: 2, max: 2, unidad: "unid", categoria: "proteinas", racion: 0.5, calorias: 90 },
-        pan: { nombre: "Pan Protein", stock: 12, max: 12, unidad: "rej", categoria: "cereales", racion: 2, calorias: 140 },
-        avena: { nombre: "Avena", stock: 800, max: 800, unidad: "g", categoria: "cereales", racion: 50, calorias: 190 },
-        arrozFideos: { nombre: "Arroz/Fideos", stock: 1000, max: 1000, unidad: "g", categoria: "cereales", racion: 100, calorias: 130 },
-        galletas: { nombre: "Galletas Arroz", stock: 3, max: 3, unidad: "paq", categoria: "cereales", racion: 0.3, calorias: 115 },
-        mani: { nombre: "Mantequilla Maní", stock: 1, max: 1, unidad: "frasco", categoria: "cereales", racion: 0.1, calorias: 95 },
-        almendras: { nombre: "Almendras", stock: 200, max: 200, unidad: "g", categoria: "cereales", racion: 30, calorias: 175 },
-        palta: { nombre: "Palta Hass", stock: 5, max: 5, unidad: "unid", categoria: "frescos", racion: 0.5, calorias: 120 },
-        lechuga: { nombre: "Lechuga Escarola", stock: 2, max: 2, unidad: "unid", categoria: "frescos", racion: 0.2, calorias: 10 },
-        tomate: { nombre: "Tomate Cocktail", stock: 500, max: 500, unidad: "g", categoria: "frescos", racion: 100, calorias: 20 },
-        zanahoria: { nombre: "Zanahoria", stock: 4, max: 4, unidad: "unid", categoria: "frescos", racion: 1, calorias: 25 },
-        papas: { nombre: "Papas", stock: 1500, max: 1500, unidad: "g", categoria: "frescos", racion: 150, calorias: 130 },
-        frutas: { nombre: "Manzanas/Peras", stock: 6, max: 6, unidad: "unid", categoria: "frescos", racion: 1, calorias: 80 }
+        k1_pechuga_de_pollo: { nombre: "Pechuga de pollo", stock: 850, max: 850, unidad: "gr", categoria: "proteinas", racion: 150, calorias: 248 },
+        k2_avena: { nombre: "Avena", stock: 550, max: 550, unidad: "gr", categoria: "cereales", racion: 50, calorias: 190 },
+        k3_palta_hass: { nombre: "Palta hass", stock: 5, max: 5, unidad: "unid", categoria: "frescos", racion: 0.5, calorias: 120 },
+        k4_chia: { nombre: "Chía", stock: 250, max: 250, unidad: "gr", categoria: "cereales", racion: 15, calorias: 70 },
+        k5_salsa_de_tomate: { nombre: "Salsa de tomate", stock: 4, max: 4, unidad: "unid", categoria: "cereales" },
+        k6_leche_descremada: { nombre: "Leche descremada", stock: 4, max: 4, unidad: "litros", categoria: "proteinas", racion: 0.2, calorias: 70 },
+        k7_atun_lomitos: { nombre: "Atún Lomitos", stock: 4, max: 4, unidad: "latas", categoria: "proteinas", racion: 1, calorias: 120 },
+        k8_jalea_sin_azucar: { nombre: "Jalea sin azúcar", stock: 4, max: 4, unidad: "unid", categoria: "cereales" },
+        k9_chocolate_cacao: { nombre: "Chocolate cacao", stock: 1, max: 1, unidad: "barra", categoria: "proteinas" },
+        k10_mantequilla_de_mani: { nombre: "Mantequilla de maní", stock: 510, max: 510, unidad: "gr", categoria: "cereales" },
+        k11_almendras: { nombre: "Almendras", stock: 80, max: 80, unidad: "gr", categoria: "cereales", racion: 30, calorias: 175 },
+        k12_papas: { nombre: "Papas", stock: 3, max: 3, unidad: "unid", categoria: "frescos" },
+        k13_tomates_cherry: { nombre: "Tomates cherry", stock: 250, max: 250, unidad: "gr", categoria: "frescos", racion: 100, calorias: 20 },
+        k14_lechuga: { nombre: "Lechuga", stock: 1, max: 1, unidad: "unid", categoria: "frescos", racion: 0.2, calorias: 10 },
+        k15_platanos: { nombre: "Plátanos", stock: 3, max: 3, unidad: "unid", categoria: "frescos", racion: 1, calorias: 90 },
+        k16_cibulette: { nombre: "Cibulette", stock: 1, max: 1, unidad: "paq", categoria: "frescos" },
+        k17_pera: { nombre: "Pera", stock: 3, max: 3, unidad: "unid", categoria: "frescos", racion: 1, calorias: 80 },
+        k18_manzanas: { nombre: "Manzanas", stock: 3, max: 3, unidad: "unid", categoria: "frescos", racion: 1, calorias: 80 },
+        k19_galletas_de_arroz: { nombre: "Galletas de arroz", stock: 13, max: 13, unidad: "unid", categoria: "cereales" },
+        k20_pan_integral_protein: { nombre: "Pan integral protein", stock: 13, max: 13, unidad: "unid", categoria: "cereales" },
+        k21_quesillo: { nombre: "Quesillo", stock: 2, max: 2, unidad: "unid", categoria: "proteinas", racion: 0.5, calorias: 90 },
+        k22_yoghurt_protein: { nombre: "Yoghurt protein", stock: 5, max: 5, unidad: "unid", categoria: "proteinas", racion: 1, calorias: 100 },
+        k23_carne_de_vacuno: { nombre: "Carne de vacuno", stock: 250, max: 250, unidad: "gr", categoria: "proteinas", racion: 150, calorias: 280 },
+        k24_huevos: { nombre: "Huevos", stock: 12, max: 12, unidad: "unid", categoria: "proteinas", racion: 1, calorias: 70 },
+        k25_fideos: { nombre: "Fideos", stock: 2, max: 2, unidad: "kilos", categoria: "cereales", racion: 0.1, calorias: 150 },
+        k26_arroz: { nombre: "Arroz", stock: 2, max: 2, unidad: "kilos", categoria: "cereales", racion: 0.1, calorias: 130 }
     };
 
     // A los ítems guardados antes de esta actualización les puede faltar "categoria"
@@ -1587,20 +1594,57 @@
         'uva': { racion: 100, unidad: 'g', calorias: 70 },
         'uvas': { racion: 100, unidad: 'g', calorias: 70 },
         'sandia': { racion: 150, unidad: 'g', calorias: 45 },
-        'pina': { racion: 150, unidad: 'g', calorias: 75 }
+        'pina': { racion: 150, unidad: 'g', calorias: 75 },
+        'chia': { racion: 15, unidad: 'g', calorias: 70 },
+        'vacuno': { racion: 150, unidad: 'g', calorias: 280 },
+        'yoghurt': { racion: 1, unidad: 'unid', calorias: 100 },
+        'yogur': { racion: 1, unidad: 'unid', calorias: 100 },
+        'manzanas': { racion: 1, unidad: 'unid', calorias: 80 },
+        'peras': { racion: 1, unidad: 'unid', calorias: 80 },
+        'platanos': { racion: 1, unidad: 'unid', calorias: 90 },
+        'tomates': { racion: 100, unidad: 'g', calorias: 20 },
+        'pepinos': { racion: 100, unidad: 'g', calorias: 15 },
+        'zanahorias': { racion: 1, unidad: 'unid', calorias: 25 },
+        'cebollas': { racion: 100, unidad: 'g', calorias: 40 },
+        'kiwis': { racion: 1, unidad: 'unid', calorias: 45 },
+        'naranjas': { racion: 1, unidad: 'unid', calorias: 60 }
     };
 
     // Convierte variantes de unidad ("gr", "gramos", "und"...) a una forma estándar comparable.
     function normalizarUnidad(u) {
         const t = normalizarTexto(u);
         if (['g', 'gr', 'grs', 'gramo', 'gramos'].includes(t)) return 'g';
+        if (['kg', 'kilo', 'kilos', 'kilogramo', 'kilogramos'].includes(t)) return 'kg';
         if (['ml', 'mililitro', 'mililitros'].includes(t)) return 'ml';
+        if (['l', 'lt', 'litro', 'litros'].includes(t)) return 'l';
         if (['unid', 'unidad', 'unidades', 'und', 'u'].includes(t)) return 'unid';
         if (['lata', 'latas'].includes(t)) return 'latas';
         if (['paq', 'paquete', 'paquetes'].includes(t)) return 'paq';
         if (['frasco', 'frascos'].includes(t)) return 'frasco';
         if (['rej', 'rebanada', 'rebanadas'].includes(t)) return 'rej';
         return t;
+    }
+
+    // Unidades "grandes" que se pueden convertir a la unidad base en la que está la base de calorías
+    // (ej: si el usuario compra en kg pero la ración de referencia está en g).
+    const conversionesUnidad = {
+        'kg': { base: 'g', factor: 0.001 },
+        'l': { base: 'ml', factor: 0.001 }
+    };
+
+    // Dado un alimento encontrado en la base de calorías y la unidad real del producto importado,
+    // calcula la ración/calorías a usar, convirtiendo la unidad si es necesario (kg<->g, l<->ml).
+    function obtenerRacionCaloricaConvertida(matchCalorico, unidadNorm) {
+        if (!matchCalorico) return null;
+        if (matchCalorico.unidad === unidadNorm) {
+            return { racion: matchCalorico.racion, calorias: matchCalorico.calorias };
+        }
+        const conv = conversionesUnidad[unidadNorm];
+        if (conv && conv.base === matchCalorico.unidad) {
+            const racionConvertida = Math.round(matchCalorico.racion * conv.factor * 10000) / 10000;
+            return { racion: racionConvertida, calorias: matchCalorico.calorias };
+        }
+        return null;
     }
 
     // Busca el alimento más específico de la base de calorías cuyo nombre aparezca como palabra(s)
@@ -1655,25 +1699,25 @@
             const keyExistente = buscarKeyPorNombre(nombreNorm);
             const unidadNorm = normalizarUnidad(unidad);
             const matchCalorico = buscarEnBaseCalorica(nombreNorm);
-            const aplicaAutoCalorias = matchCalorico && matchCalorico.unidad === unidadNorm;
+            const infoCalorica = obtenerRacionCaloricaConvertida(matchCalorico, unidadNorm);
 
             if (keyExistente) {
                 despensa[keyExistente].stock = (despensa[keyExistente].stock || 0) + cantidad;
                 despensa[keyExistente].max = Math.max(despensa[keyExistente].max || 0, despensa[keyExistente].stock);
                 if (unidad) despensa[keyExistente].unidad = unidad;
                 // Solo autocompleta calorías si el producto todavía no tenía ración/calorías configuradas.
-                if (aplicaAutoCalorias && !despensa[keyExistente].racion && !despensa[keyExistente].calorias) {
-                    despensa[keyExistente].racion = matchCalorico.racion;
-                    despensa[keyExistente].calorias = matchCalorico.calorias;
+                if (infoCalorica && !despensa[keyExistente].racion && !despensa[keyExistente].calorias) {
+                    despensa[keyExistente].racion = infoCalorica.racion;
+                    despensa[keyExistente].calorias = infoCalorica.calorias;
                     conCalorias++;
                 }
                 actualizados++;
             } else {
                 const key = 'custom_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
                 despensa[key] = { nombre, stock: cantidad, max: cantidad, unidad, categoria };
-                if (aplicaAutoCalorias) {
-                    despensa[key].racion = matchCalorico.racion;
-                    despensa[key].calorias = matchCalorico.calorias;
+                if (infoCalorica) {
+                    despensa[key].racion = infoCalorica.racion;
+                    despensa[key].calorias = infoCalorica.calorias;
                     conCalorias++;
                 }
                 nuevos++;
